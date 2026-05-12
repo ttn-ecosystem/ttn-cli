@@ -1,0 +1,11 @@
+{
+  "name": "ttn-cli",
+  "description": "脚手架工程",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "lerna": "^9.0.7"
+  }
+}
