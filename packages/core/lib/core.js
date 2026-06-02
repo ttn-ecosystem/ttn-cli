@@ -45,7 +45,7 @@ function registerCommand() {
 
   program.option("--debug", "打开调试模式").parse(process.argv);
 
-  // 如果没有子命令，则输出 help 帮助信息
+  // 直接输入 ttn-cli 没有子命令时，输出 help 帮助信息
   if (args._.length < 1) {
     program.outputHelp();
     console.log();
