@@ -43,7 +43,7 @@ function getVersions(npm, registry) {
   });
 }
 
-// 根据指定 version 获取符合 semver 规范的最新版本号
+// 根据指定 version 获取满足 semver 规范的最新版本号
 function getLatestSemverVersion(baseVersion, versions) {
   versions = versions
     .filter(function (version) { return semver.satisfies(version, "^" + baseVersion); })
