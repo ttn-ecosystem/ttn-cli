@@ -77,10 +77,12 @@ function checkInputArgs() {
 function checkEnv() {
   log.verbose("开始检查环境变量");
   // 从 .env 文件中加载环境变量到 process.env
-  const dotenv = require("dotenv");
+  // 如果 .env 中写了：CLI_HOMEAAA=my-cli，那就可以从 process.env.CLI_HOMEAAA 中获取到 my-cli 这个值
+  const dotenv = require("dotenv"); // API 密钥、用户名密码
   dotenv.config({
     path: path.resolve(userHome, ".env"),
   });
+  // TODO 不清楚这个是干什么用的?
   config = createCliConfig(); // 准备基础配置
   log.verbose("环境变量", config);
 }
@@ -97,6 +99,7 @@ function createCliConfig() {
   return cliConfig;
 }
 
+// 提示用户更新最新版本的脚手架
 async function checkGlobalUpdate() {
   log.verbose("检查 ttn-cli 最新版本");
   const currentVersion = packageConfig.version;
