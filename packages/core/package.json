@@ -27,6 +27,7 @@
     "minimist": "^1.2.8",
     "root-check": "^1.0.0",
     "semver": "^7.8.1",
-    "user-home": "^3.0.0"
+    "user-home": "^3.0.0",
+    "colors": "^1.4.0"
   }
 }
