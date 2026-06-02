@@ -8,7 +8,7 @@ const logger = pino({
   level: logLevel,
   name: 'ttn',
   transport: {
-    target: 'pino-pretty',
+    target: require.resolve('pino-pretty'),
     options: {
       colorize: true,
       translateTime: 'SYS:yyyy-mm-dd HH:MM:ss',
@@ -17,14 +17,14 @@ const logger = pino({
         success: 20,
         notice: 25
       },
-      messageFormat: '[ttn] {msg}',
+      messageFormat: '[ttn-cli] {msg}',
       levelFirst: true
     }
   }
 });
 
-logger.success = logger.info.bind(logger);
-logger.notice = logger.info.bind(logger);
+logger.notice = (...args) => logger.info(args.join(' '));
+logger.success = (...args) => logger.info(args.join(' '));
 
 logger.level = logLevel;
 logger.heading = 'ttn';

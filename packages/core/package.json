@@ -23,6 +23,9 @@
     "test": "node ./__tests__/@ttn-cli/core.test.js"
   },
   "dependencies": {
-    "@ttn-cli/utils": "workspace:*"
+    "@ttn-cli/utils": "workspace:*",
+    "root-check": "^1.0.0",
+    "semver": "^7.8.1",
+    "user-home": "^3.0.0"
   }
 }
