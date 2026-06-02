@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const userHome = require("user-home");
 const colors = require("colors/safe");
-const program = require('commander');
+const program = require("commander");
 const { log, locale, npm } = require("@ttn-cli/utils");
 const packageConfig = require("../package.json");
 
@@ -33,17 +33,23 @@ async function cli() {
 
 // 注册指令
 function registerCommand() {
-  program.version(packageConfig.version).usage('<command> [options]'); // 支持 ttn-cli -V
+  program.version(packageConfig.version).usage("<command> [options]"); // 支持 ttn-cli -V
   program
-    .command('desc')
-    .description('查看 ttn-cli 描述')
+    .command("desc")
+    .description("查看 ttn-cli 描述")
     .action(() => {
-      log.success('欢迎使用 ttn-cli');
-      log.success('官网链接', 'https://ttn-ecosystem.github.io/ttn-docs/');
-      log.success('作者介绍', 'code-YuJun');
+      log.success("欢迎使用 ttn-cli");
+      log.success("官网链接", "https://ttn-ecosystem.github.io/ttn-docs/");
+      log.success("作者介绍", "code-YuJun");
     });
 
-  program.parse(process.argv);
+  program.option("--debug", "打开调试模式").parse(process.argv);
+
+  // 如果没有子命令，则输出 help 帮助信息
+  if (args._.length < 1) {
+    program.outputHelp();
+    console.log();
+  }
 }
 
 async function prepare() {
