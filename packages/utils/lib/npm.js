@@ -5,7 +5,7 @@ const semver = require("semver");
 // 获取 registry 信息
 function getNpmRegistry(isOriginal = false) {
   return isOriginal ? 'https://registry.npmjs.org' :
-    'https://registry.npm.taobao.org';
+    'https://registry.npmmirror.com';
 }
 
 // 从 registry 获取 npm 的信息
@@ -13,13 +13,13 @@ function getNpmInfo(npm, registry) {
   const register = registry || getNpmRegistry();
   const url = urlJoin(register, npm);
   return axios.get(url).then(function(response) {
-    try {
-      if (response.status === 200) {
-        return response.data;
-      }
-    } catch (error) {
-      return Promise.reject(error);
+    if (response.status === 200) {
+      return response.data;
     }
+    return Promise.reject(new Error(`请求失败，状态码: ${response.status}`));
+  }).catch(function(error) {
+    console.log('获取 npm 信息失败', error.message);
+    return Promise.reject(error);
   });
 }
 

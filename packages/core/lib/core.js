@@ -103,15 +103,19 @@ function createCliConfig() {
 async function checkGlobalUpdate() {
   log.verbose("检查 ttn-cli 最新版本");
   const currentVersion = packageConfig.version;
-  // 获取当前脚手架的最新版本
-  const lastVersion = await npm.getNpmLatestSemverVersion(
-    NPM_NAME,
-    currentVersion,
-  );
-  if (lastVersion && semver.gt(lastVersion, currentVersion)) {
-    log.warn(
-      colors.yellow(`请手动更新 ${NPM_NAME}，当前版本：${packageConfig.version}，最新版本：${lastVersion}
-                更新命令： npm install -g ${NPM_NAME}`),
+  try {
+    // 获取当前脚手架的最新版本
+    const lastVersion = await npm.getNpmLatestSemverVersion(
+      NPM_NAME,
+      currentVersion,
     );
+    if (lastVersion && semver.gt(lastVersion, currentVersion)) {
+      log.warn(
+        colors.yellow(`请手动更新 ${NPM_NAME}，当前版本：${packageConfig.version}，最新版本：${lastVersion}
+                更新命令： npm install -g ${NPM_NAME}`),
+      );
+    }
+  } catch (error) {
+    log.verbose(`版本检查失败: ${error.message}`);
   }
 }
