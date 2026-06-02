@@ -11,6 +11,9 @@
     "lib"
   ],
   "dependencies": {
-    "npmlog": "^4.1.2"
+    "axios": "^0.20.0",
+    "cli-spinner": "^0.2.10",
+    "npmlog": "^4.1.2",
+    "terminal-link": "^2.1.1"
   }
 }
