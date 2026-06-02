@@ -1,32 +1,14 @@
-'use strict';
+const log = require('npmlog')
 
-const pino = require('pino');
+// 在模块加载时就检查命令行参数
+const minimist = require('minimist');
+const args = minimist(process.argv.slice(2));
+const logLevel = args.debug ? 'verbose' : (process.env.LOG_LEVEL || 'info');
 
-const logLevel = process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'info';
+log.level = logLevel;
 
-const logger = pino({
-  level: logLevel,
-  name: 'ttn',
-  transport: {
-    target: require.resolve('pino-pretty'),
-    options: {
-      colorize: true,
-      translateTime: 'SYS:yyyy-mm-dd HH:MM:ss',
-      ignore: 'pid,hostname',
-      customLevels: {
-        success: 20,
-        notice: 25
-      },
-      messageFormat: '[ttn-cli] {msg}',
-      levelFirst: true
-    }
-  }
-});
+log.heading = 'ttn-cli' // 自定义头部
+log.addLevel('success', 2000, { fg: 'green', bold: true }) // 自定义success日志
+log.addLevel('notice', 2000, { fg: 'blue', bg: 'black' }) // 自定义notice日志
 
-logger.notice = (...args) => logger.info(args.join(' '));
-logger.success = (...args) => logger.info(args.join(' '));
-
-logger.level = logLevel;
-logger.heading = 'ttn';
-
-module.exports = logger;
+module.exports = log
