@@ -7,6 +7,7 @@ const colors = require("colors/safe");
 const program = require("commander");
 const { log, locale, npm } = require("@ttn-cli/utils");
 const packageConfig = require("../package.json");
+const init = require("@ttn-cli/init");
 
 const {
   LOWEST_NODE_VERSION,
@@ -43,10 +44,32 @@ function registerCommand() {
       log.success("作者介绍", "code-YuJun");
     });
 
+  program
+    .command("init [type]")
+    .description("项目初始化")
+    .option("--packagePath <packagePath>", "手动指定init包路径")
+    .option("--force", "是否强制初始化项目")
+    .action(async (type, { packagePath, force }) => {
+      // const packageName = "@ttn-cli/init";
+      // const packageVersion = "1.0.0";
+      // await execCommand(
+      //   { packagePath, packageName, packageVersion },
+      //   { type, force },
+      // );
+      console.log(init(type));
+    });
+
+  // 处理未知命令
+  program.on("command:*", function (args) {
+    const availableCommands = program.commands.map((cmd) => cmd.name());
+    log.error("未知的命令: " + args[0]);
+    log.info("可用命令: " + availableCommands.join(" "));
+    process.exit(1);
+  });
   program.option("--debug", "打开调试模式").parse(process.argv);
 
   // 直接输入 ttn-cli 没有子命令时，输出 help 帮助信息
-  if (args._.length < 1) {
+  if (program.args && program.args.length < 1) {
     program.outputHelp();
     console.log();
   }

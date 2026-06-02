@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@ttn-cli/utils": "workspace:*",
+    "@ttn-cli/init": "workspace:*",
     "minimist": "^1.2.8",
     "root-check": "^1.0.0",
     "semver": "^7.8.1",

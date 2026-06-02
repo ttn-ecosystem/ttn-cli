@@ -14,6 +14,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@ttn-cli/init':
+        specifier: workspace:*
+        version: link:../init
       '@ttn-cli/utils':
         specifier: workspace:*
         version: link:../utils
@@ -38,6 +41,8 @@ importers:
       user-home:
         specifier: ^3.0.0
         version: 3.0.0
+
+  packages/init: {}
 
   packages/utils:
     dependencies:
