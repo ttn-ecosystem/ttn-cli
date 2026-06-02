@@ -21,5 +21,8 @@
   },
   "scripts": {
     "test": "node ./__tests__/@ttn-cli/core.test.js"
+  },
+  "dependencies": {
+    "@ttn-cli/utils": "workspace:*"
   }
 }
