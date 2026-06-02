@@ -3,10 +3,15 @@
 const fs = require("fs");
 const path = require("path");
 const userHome = require("user-home");
-const colors = require('colors/safe');
+const colors = require("colors/safe");
 const { log, locale, npm } = require("@ttn-cli/utils");
 const packageConfig = require("../package.json");
-const { LOWEST_NODE_VERSION, DEFAULT_CLI_HOME, NPM_NAME, DEPENDENCIES_PATH } = require("./const");
+const {
+  LOWEST_NODE_VERSION,
+  DEFAULT_CLI_HOME,
+  NPM_NAME,
+  DEPENDENCIES_PATH,
+} = require("./const");
 
 module.exports = cli;
 
@@ -57,7 +62,7 @@ function checkUserHome() {
     process.exit(1);
   }
 }
-
+// 检查入参的目的是：判断是否开启了 debug 模式，debug 模式用 log.verbose 打印详细日志
 function checkInputArgs() {
   log.verbose("开始校验输入参数");
   const minimist = require("minimist"); // 将命令行参数转换为结构化的 JavaScript 对象
@@ -68,7 +73,7 @@ function checkInputArgs() {
 
 function checkArgs(args) {
   if (args.debug) {
-    process.env.LOG_LEVEL = "debug";
+    process.env.LOG_LEVEL = "verbose";
   } else {
     process.env.LOG_LEVEL = "info";
   }
@@ -76,13 +81,14 @@ function checkArgs(args) {
   log.level = process.env.LOG_LEVEL;
 }
 
+// 用户名、密码等都在环境变量中存储，避免直接在代码中硬编码
 function checkEnv() {
   log.verbose("开始检查环境变量");
   // 从 .env 文件中加载环境变量到 process.env
   const dotenv = require("dotenv");
-  dotenv.config({
+    dotenv.config({
     path: path.resolve(userHome, ".env"),
-  });
+    });
   config = createCliConfig(); // 准备基础配置
   log.verbose("环境变量", config);
 }
