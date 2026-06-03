@@ -7,7 +7,6 @@ const colors = require("colors/safe");
 const program = require("commander");
 const { log, locale, npm } = require("@ttn-cli/utils");
 const packageConfig = require("../package.json");
-const init = require("@ttn-cli/init");
 
 const {
   LOWEST_NODE_VERSION,
@@ -47,6 +46,7 @@ function registerCommand() {
   program
     .command("init [type]")
     .description("项目初始化")
+    // 判断是否去执行本地代码
     .option("--packagePath <packagePath>", "手动指定init包路径") // 允许用户手动指定 init 包的本地路径（用于开发调试）
     .option("--force", "是否强制初始化项目")
     .action(async (type, { packagePath, force }) => {
