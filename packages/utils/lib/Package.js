@@ -16,7 +16,7 @@ class Package {
   constructor(options) {
     log.verbose("options", options);
     this.targetPath = options.targetPath; // 包安装目标路径
-    this.storePath = options.storePath; // 包缓存路径
+    this.storePath = options.storePath; // 全局的包缓存路径
     this.packageName = options.name; // npm包名（如 "lodash"、"@vue/cli"）
     this.packageVersion = options.version; // 包版本号
     this.npmFilePathPrefix = this.packageName.replace("/", "_"); // 将包名中的"/"替换为"_"，用于生成存储目录名
