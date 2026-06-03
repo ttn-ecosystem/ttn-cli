@@ -11,6 +11,7 @@ const inquirer = require('./inquirer');
 const locale = require("./Locale/loadLocale");
 
 const Package = require('./Package');
+const ejs = require('./ejs');
 
 module.exports = {
   log,
@@ -23,4 +24,5 @@ module.exports = {
   terminalLink,
   Package,
   inquirer,
+  ejs,
 };
