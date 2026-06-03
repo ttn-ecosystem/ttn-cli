@@ -47,16 +47,15 @@ function registerCommand() {
   program
     .command("init [type]")
     .description("项目初始化")
-    .option("--packagePath <packagePath>", "手动指定init包路径")
+    .option("--packagePath <packagePath>", "手动指定init包路径") // 允许用户手动指定 init 包的本地路径（用于开发调试）
     .option("--force", "是否强制初始化项目")
     .action(async (type, { packagePath, force }) => {
-      // const packageName = "@ttn-cli/init";
-      // const packageVersion = "1.0.0";
-      // await execCommand(
-      //   { packagePath, packageName, packageVersion },
-      //   { type, force },
-      // );
-      console.log(init(type));
+      const packageName = "@ttn-cli/init";
+      const packageVersion = "1.0.0";
+      await execCommand(
+        { packagePath, packageName, packageVersion },
+        { type, force },
+      );
     });
 
   // 处理未知命令
@@ -72,6 +71,63 @@ function registerCommand() {
   if (program.args && program.args.length < 1) {
     program.outputHelp();
     console.log();
+  }
+}
+
+// 命令包执行器 ，负责 动态加载和执行
+async function execCommand({ packagePath, packageName, packageVersion }, extraOptions) {
+  let rootFile;
+  try {
+    if (packagePath) {
+      // 使用本地路径加载包
+      const execPackage = new Package({
+        targetPath: packagePath,
+        storePath: packagePath,
+        name: packageName,
+        version: packageVersion,
+      });
+      rootFile = execPackage.getRootFilePath(true);
+    } else {
+      // 生产模式：从缓存目录加载
+      const { cliHome } = config;
+      const packageDir = `${DEPENDENCIES_PATH}`;
+      const targetPath = path.resolve(cliHome, packageDir);
+      const storePath = path.resolve(targetPath, 'node_modules');
+      const initPackage = new Package({
+        targetPath,
+        storePath,
+        name: packageName,
+        version: packageVersion,
+      });
+      // 检查本地缓存，不存在则从 npm 安装
+      if (await initPackage.exists()) {
+        await initPackage.update();
+      } else {
+        await initPackage.install();
+      }
+      rootFile = initPackage.getRootFilePath();
+    }
+    const _config = Object.assign({}, config, extraOptions, {
+      debug: args.debug,
+    });
+    if (fs.existsSync(rootFile)) {
+      const code = `require('${rootFile}')(${JSON.stringify(_config)})`;
+      // 通过 node -e 动态执行入口文件
+      const p = exec('node', ['-e', code], { 'stdio': 'inherit' }); // node -e "require('xxx')(config)"
+      p.on('error', e => {
+        log.verbose('命令执行失败:', e);
+        handleError(e);
+        process.exit(1);
+      });
+      p.on('exit', c => {
+        log.verbose('命令执行成功:', c);
+        process.exit(c);
+      });
+    } else {
+      throw new Error('入口文件不存在，请重试！');
+    }
+  } catch (e) {
+    log.error(e.message);
   }
 }
 
