@@ -9,6 +9,8 @@ const formatPath = require("./formatPath");
 const terminalLink = require("./terminalLink");
 const locale = require("./Locale/loadLocale");
 
+const Package = require('./Package');
+
 module.exports = {
   log,
   npm,
@@ -18,4 +20,5 @@ module.exports = {
   request,
   spinner,
   terminalLink,
+  Package,
 };
