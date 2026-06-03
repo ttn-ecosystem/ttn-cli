@@ -81,7 +81,9 @@ async function execCommand({ packagePath, packageName, packageVersion }, extraOp
     if (packagePath) {
       // 使用本地路径加载包
       const execPackage = new Package({
+        // 包安装目标路径
         targetPath: packagePath,
+        // 全局包缓存路径
         storePath: packagePath,
         name: packageName,
         version: packageVersion,
@@ -89,10 +91,11 @@ async function execCommand({ packagePath, packageName, packageVersion }, extraOp
       rootFile = execPackage.getRootFilePath(true);
     } else {
       // 生产模式：从缓存目录加载
-      const { cliHome } = config;
-      const packageDir = `${DEPENDENCIES_PATH}`;
-      const targetPath = path.resolve(cliHome, packageDir);
-      const storePath = path.resolve(targetPath, 'node_modules');
+      const { cliHome } = config; // '/Users/qiangyujun/.ttn-cli'
+      const packageDir = `${DEPENDENCIES_PATH}`; // dependencies
+      const targetPath = path.resolve(cliHome, packageDir); // '/Users/qiangyujun/.ttn-cli/dependencies'
+      // 全局包缓存路径
+      const storePath = path.resolve(targetPath, 'node_modules'); // '/Users/qiangyujun/.ttn-cli/dependencies/node_modules'
       const initPackage = new Package({
         targetPath,
         storePath,
@@ -184,19 +187,19 @@ function checkEnv() {
   dotenv.config({
     path: path.resolve(userHome, ".env"),
   });
-  // TODO 不清楚这个是干什么用的?
-  config = createCliConfig(); // 准备基础配置
+  // 在 init 指令中用到这个了，第三方包下载时的目录
+  config = createCliConfig();
   log.verbose("环境变量", config);
 }
 
 function createCliConfig() {
   const cliConfig = {
-    home: userHome,
+    home: userHome, // '/Users/qiangyujun'
   };
   if (process.env.CLI_HOME) {
     cliConfig["cliHome"] = path.join(userHome, process.env.CLI_HOME);
   } else {
-    cliConfig["cliHome"] = path.join(userHome, DEFAULT_CLI_HOME); // .ttn-cli
+    cliConfig["cliHome"] = path.join(userHome, DEFAULT_CLI_HOME); // '/Users/qiangyujun/.ttn-cli'
   }
   return cliConfig;
 }

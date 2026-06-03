@@ -52,7 +52,9 @@ class Package {
   async install() {
     await this.prepare();
     return npminstall({
+      // 安装依赖的目标项目路径，npminstall 会在这个目录下查找 package.json，并把依赖安装到 ${root}/node_modules 中。
       root: this.targetPath,
+      // 全局存储目录，npminstall 会把所有下载的包真实文件放到这个目录里集中存放
       storeDir: this.storePath,
       registry: npm.getNpmRegistry(useOriginNpm),
       pkgs: [
