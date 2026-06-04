@@ -15,7 +15,7 @@ const DEFAULT_TYPE = TYPE_PROJECT;
 
 async function init(options) {
   try {
-    // 设置目标路径
+    // 设置要创建的项目安装的路径
     let targetPath = process.cwd();
     if (!options.targetPath) {
       options.targetPath = targetPath;
@@ -224,8 +224,7 @@ async function downloadTemplate(templateList, options) {
 }
 
 async function prepare(options) {
-  // 目录空检查
-  // 读取当前目录，过滤掉 node_modules 、 .git 、 .DS_Store ，如果目录不为空则询问用户是否继续。
+  // 目录空检查：读取当前目录，过滤掉 node_modules 、 .git 、 .DS_Store ，如果目录不为空则询问用户是否继续。
   let fileList = fs.readdirSync(process.cwd());
   fileList = fileList.filter(file => ['node_modules', '.git', '.DS_Store'].indexOf(file) < 0);
   log.verbose('fileList', fileList);

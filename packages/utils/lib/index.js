@@ -7,6 +7,8 @@ const request = require("./request");
 const spinner = require("./spinner");
 const formatPath = require("./formatPath");
 const terminalLink = require("./terminalLink");
+const formatName = require("./formatName");
+const formatClassName = require("./formatClassName");
 const inquirer = require('./inquirer');
 const locale = require("./Locale/loadLocale");
 
@@ -22,7 +24,9 @@ module.exports = {
   request,
   spinner,
   terminalLink,
-  Package,
+  formatName,
+  formatClassName,
   inquirer,
+  Package,
   ejs,
 };
