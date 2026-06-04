@@ -42,7 +42,14 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
 
-  packages/init: {}
+  packages/init:
+    dependencies:
+      '@ttn-cli/utils':
+        specifier: workspace:*
+        version: link:../utils
+      fs-extra:
+        specifier: ^9.0.1
+        version: 9.1.0
 
   packages/utils:
     dependencies:
