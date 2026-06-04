@@ -15,25 +15,29 @@ const DEFAULT_TYPE = TYPE_PROJECT;
 
 async function init(options) {
   try {
-    // 设置 targetPath
+    // 设置目标路径
     let targetPath = process.cwd();
     if (!options.targetPath) {
       options.targetPath = targetPath;
     }
     log.verbose('init', options);
+
     // 完成项目初始化的准备和校验工作
     const result = await prepare(options);
     if (!result) {
       log.info('创建项目终止');
       return;
     }
+
     // 获取项目模板列表
     const { templateList, project } = result;
-    // 缓存项目模板文件
+
+    // 下载项目模板
     const template = await downloadTemplate(templateList, options);
     log.verbose('template', template);
+
+    // 模板安装阶段
     if (template.type === TEMPLATE_TYPE_NORMAL) {
-      // 安装项目模板
       await installTemplate(template, project, options);
     } else if (template.type === TEMPLATE_TYPE_CUSTOM) {
       await installCustomTemplate(template, project, options);
@@ -51,6 +55,7 @@ async function init(options) {
   }
 }
 
+// 自定义模板安装 installCustomTemplate
 async function installCustomTemplate(template, ejsData, options) {
   const pkgPath = path.resolve(template.sourcePath, 'package.json');
   const pkg = fse.readJsonSync(pkgPath);
@@ -67,7 +72,7 @@ async function installCustomTemplate(template, ejsData, options) {
   });
   log.success('自定义模板执行成功');
 }
-
+// 通过 Node.js 子进程执行自定义模板脚本
 function execCustomTemplate(rootFile, options) {
   const code = `require('${rootFile}')(${JSON.stringify(options)})`;
   return new Promise((resolve, reject) => {
@@ -80,7 +85,7 @@ function execCustomTemplate(rootFile, options) {
     });
   });
 }
-
+// 执行 npm install ，使用淘宝镜像加速
 async function npminstall(targetPath) {
   return new Promise((resolve, reject) => {
     const p = exec('npm', ['install', '--registry=https://registry.npm.taobao.org'], { stdio: 'inherit', cwd: targetPath });
@@ -105,7 +110,7 @@ async function execStartCommand(targetPath, startCommand) {
   });
 }
 
-// 如果是组件项目，则创建组件相关文件
+// 创建组件配置文件 .componentrc
 async function createComponentFile(template, data, dir) {
   if (template.tag.includes(TYPE_COMPONENT)) {
     const componentData = {
@@ -124,14 +129,17 @@ async function installTemplate(template, ejsData, options) {
   // 安装模板
   let spinnerStart = spinner(`正在安装模板...`);
   await sleep(1000);
+  // 将模板目录复制到目标目录
   const sourceDir = template.path;
   const targetDir = options.targetPath;
   fse.ensureDirSync(sourceDir);
   fse.ensureDirSync(targetDir);
   fse.copySync(sourceDir, targetDir);
+
   spinnerStart.stop(true);
   log.success('模板安装成功');
-  // ejs 模板渲染
+
+  // 对模板文件进行 EJS 渲染，将用户输入的项目信息注入到模板中
   const ejsIgnoreFiles = [
     '**/node_modules/**',
     '**/.git/**',
@@ -145,13 +153,15 @@ async function installTemplate(template, ejsData, options) {
   await ejs(targetDir, ejsData, {
     ignore: ejsIgnoreFiles,
   });
-  // 如果是组件，则进行特殊处理
+
+  // 创建组件配置文件，如果是组件类型，创建 .componentrc 配置文件。
   await createComponentFile(template, ejsData, targetDir);
   // 安装依赖文件
   log.notice('开始安装依赖');
-  await npminstall(targetDir);
+  await npminstall(targetDir); // 调用 npm install 安装项目依赖
   log.success('依赖安装成功');
-  // 启动代码
+
+  // 如果模板定义了启动命令，则执行该命令
   if (template.startCommand) {
     log.notice('开始执行启动命令');
     const startCommand = template.startCommand.split(' ');
@@ -160,14 +170,17 @@ async function installTemplate(template, ejsData, options) {
 }
 
 async function downloadTemplate(templateList, options) {
-  // 用户交互选择
+  // 用户选择模板
   const templateName = await inquirer({
     choices: createTemplateChoice(templateList),
     message: '请选择项目模板',
   });
   log.verbose('template', templateName);
+  // 选中的模板
   const selectedTemplate = templateList.find(item => item.npmName === templateName);
   log.verbose('selected template', selectedTemplate);
+
+  // 创建 Package 实例
   const { cliHome } = options;
   const targetPath = path.resolve(cliHome, 'template');
   // 基于模板生成 Package 对象
@@ -177,7 +190,7 @@ async function downloadTemplate(templateList, options) {
     name: selectedTemplate.npmName,
     version: selectedTemplate.version,
   });
-  // 如果模板不存在则进行下载
+  // 检查模板是否已存在，不存在则下载，存在则更新。
   if (!await templatePkg.exists()) {
     let spinnerStart = spinner(`正在下载模板...`);
     await sleep(1000);
@@ -193,7 +206,9 @@ async function downloadTemplate(templateList, options) {
     spinnerStart.stop(true);
     log.success('更新模板成功');
   }
-  // 生成模板路径
+
+  // 构建模板路径
+  // 验证模板目录存在，然后返回包含完整路径信息的模板对象
   const templateSourcePath = templatePkg.npmFilePath;
   const templatePath = path.resolve(templateSourcePath, 'template');
   log.verbose('template path', templatePath);
@@ -209,11 +224,13 @@ async function downloadTemplate(templateList, options) {
 }
 
 async function prepare(options) {
+  // 目录空检查
+  // 读取当前目录，过滤掉 node_modules 、 .git 、 .DS_Store ，如果目录不为空则询问用户是否继续。
   let fileList = fs.readdirSync(process.cwd());
   fileList = fileList.filter(file => ['node_modules', '.git', '.DS_Store'].indexOf(file) < 0);
   log.verbose('fileList', fileList);
   let continueWhenDirNotEmpty = true;
-  if (fileList && fileList.length > 0) {
+  if (fileList && fileList.length > 0) { // 判断当前目录是否为空
     continueWhenDirNotEmpty = await inquirer({
       type: 'confirm',
       message: '当前文件夹不为空，是否继续创建项目？',
@@ -223,6 +240,8 @@ async function prepare(options) {
   if (!continueWhenDirNotEmpty) {
     return;
   }
+
+  // 如果传入了 --force 参数，询问用户是否确认清空目录
   if (options.force) {
     const targetDir = options.targetPath;
     const confirmEmptyDir = await inquirer({
@@ -234,28 +253,39 @@ async function prepare(options) {
       fse.emptyDirSync(targetDir);
     }
   }
+
+  // 获取初始化类型：（项目/组件）
   let initType = await getInitType();
   log.verbose('initType', initType);
+
+  // 获取模板列表
   let templateList = await getProjectTemplate();
   if (!templateList || templateList.length === 0) {
     throw new Error('项目模板列表获取失败');
   }
+
+  // 获取项目/组件名称
   let projectName = '';
   let className = '';
+  // 获取项目名称
   while (!projectName) {
     projectName = await getProjectName(initType);
     if (projectName) {
-      projectName = formatName(projectName);
-      className = formatClassName(projectName);
+      projectName = formatName(projectName); // 格式化为 kebab-case
+      className = formatClassName(projectName); // 格式化为 PascalCase
     }
     log.verbose('name', projectName);
     log.verbose('className', className);
   }
+
+  // 获取版本号
   let version = '1.0.0';
   do {
     version = await getProjectVersion(version, initType);
     log.verbose('version', version);
   } while (!version);
+
+  // 返回结果
   if (initType === TYPE_PROJECT) {
     templateList = templateList.filter(item => item.tag.includes('project'));
     return {
