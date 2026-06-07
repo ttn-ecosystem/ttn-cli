@@ -42,17 +42,16 @@ async function cli() {
 function registerCommand() {
   // 支持 ttn-cli -V / --version
   program.version(packageConfig.version).usage("<command> [options]");
-  
+
   program
     .command("init")
     .description("项目初始化")
-    .option("--packagePath <packagePath>", "手动指定init包路径")
     .option("--force", "是否强制初始化项目")
-    .action(async ({ packagePath, force }) => {
+    .action(async ({ force }) => {
       const packageName = "@ttn-cli/init";
       const packageVersion = "1.0.0";
       await execCommand(
-        { packagePath, packageName, packageVersion },
+        { packageName, packageVersion },
         { force },
       );
     });
@@ -75,7 +74,7 @@ function registerCommand() {
 
 // 命令包执行器 ，负责 动态加载和执行
 async function execCommand(
-  { packagePath, packageName, packageVersion },
+  { packageName, packageVersion },
   extraOptions,
 ) {
   let rootFile;
@@ -191,6 +190,12 @@ function checkEnv() {
   });
   if (result.error) {
     log.verbose(`环境变量加载失败: ${result.error.message}`);
+  }
+  // 如果是开发环境
+  const localInitPath = path.resolve(__dirname, '../../init');
+  if (fs.existsSync(localInitPath)) {
+    config.isDev = true;
+    config.devPackagePath = localInitPath;
   }
 }
 
