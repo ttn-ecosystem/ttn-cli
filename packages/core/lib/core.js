@@ -189,21 +189,6 @@ function checkEnv() {
   dotenv.config({
     path: path.resolve(userHome, ".env"),
   });
-  // 在 init 指令中用到这个了，第三方包下载时的目录
-  config = createCliConfig();
-  log.verbose("环境变量", config);
-}
-
-function createCliConfig() {
-  const cliConfig = {
-    home: userHome, // '/Users/qiangyujun'
-  };
-  if (process.env.CLI_HOME) {
-    cliConfig["cliHome"] = path.join(userHome, process.env.CLI_HOME);
-  } else {
-    cliConfig["cliHome"] = path.join(userHome, DEFAULT_CLI_HOME); // '/Users/qiangyujun/.ttn-cli'
-  }
-  return cliConfig;
 }
 
 // 提示用户更新最新版本的脚手架
