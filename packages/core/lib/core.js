@@ -6,7 +6,7 @@ const userHome = require("user-home");
 const colors = require("colors/safe");
 const program = require("commander");
 const semver = require("semver");
-const { log, locale, npm } = require("@ttn-cli/utils");
+const { log, locale, npm, Package } = require("@ttn-cli/utils");
 const packageConfig = require("../package.json");
 
 // 常量定义
@@ -17,7 +17,7 @@ const DEPENDENCIES_PATH = "dependencies";
 module.exports = cli;
 
 let args; // 命令行参数
-let config; // 环境变量配置
+let config = {}; // 环境变量配置
 
 async function cli() {
   try {
@@ -50,10 +50,7 @@ function registerCommand() {
     .action(async ({ force }) => {
       const packageName = "@ttn-cli/init";
       const packageVersion = "1.0.0";
-      await execCommand(
-        { packageName, packageVersion },
-        { force },
-      );
+      await execCommand({ packageName, packageVersion }, { force });
     });
 
   // 处理未知命令
@@ -73,44 +70,44 @@ function registerCommand() {
 }
 
 // 命令包执行器 ，负责 动态加载和执行
-async function execCommand(
-  { packageName, packageVersion },
-  extraOptions,
-) {
+async function execCommand({ packageName, packageVersion }, extraOptions) {
   let rootFile;
   try {
-    if (packagePath) {
-      // 使用本地路径加载包
+    // } else {
+    //   // 生产模式：从缓存目录加载
+    //   const { cliHome } = config; // '/Users/qiangyujun/.ttn-cli'
+    //   const packageDir = `${DEPENDENCIES_PATH}`; // dependencies
+    //   const targetPath = path.resolve(cliHome, packageDir); // '/Users/qiangyujun/.ttn-cli/dependencies'
+    //   // 全局包缓存路径
+    //   const storePath = path.resolve(targetPath, "node_modules"); // '/Users/qiangyujun/.ttn-cli/dependencies/node_modules'
+    //   const initPackage = new Package({
+    //     targetPath,
+    //     storePath,
+    //     name: packageName,
+    //     version: packageVersion,
+    //   });
+    //   // 检查本地缓存，不存在则从 npm 安装
+    //   if (await initPackage.exists()) {
+    //     await initPackage.update();
+    //   } else {
+    //     await initPackage.install();
+    //   }
+    //   rootFile = initPackage.getRootFilePath();
+    // }
+    if (config.isDev) {
       const execPackage = new Package({
         // 包安装目标路径
-        targetPath: packagePath,
+        targetPath: config.initDevPackagePath,
         // 全局包缓存路径
-        storePath: packagePath,
+        storePath: config.initDevPackagePath,
         name: packageName,
         version: packageVersion,
       });
       rootFile = execPackage.getRootFilePath(true);
     } else {
-      // 生产模式：从缓存目录加载
-      const { cliHome } = config; // '/Users/qiangyujun/.ttn-cli'
-      const packageDir = `${DEPENDENCIES_PATH}`; // dependencies
-      const targetPath = path.resolve(cliHome, packageDir); // '/Users/qiangyujun/.ttn-cli/dependencies'
-      // 全局包缓存路径
-      const storePath = path.resolve(targetPath, "node_modules"); // '/Users/qiangyujun/.ttn-cli/dependencies/node_modules'
-      const initPackage = new Package({
-        targetPath,
-        storePath,
-        name: packageName,
-        version: packageVersion,
-      });
-      // 检查本地缓存，不存在则从 npm 安装
-      if (await initPackage.exists()) {
-        await initPackage.update();
-      } else {
-        await initPackage.install();
-      }
-      rootFile = initPackage.getRootFilePath();
+
     }
+
     const _config = Object.assign({}, config, extraOptions, {
       debug: args.debug,
     });
@@ -192,10 +189,10 @@ function checkEnv() {
     log.verbose(`环境变量加载失败: ${result.error.message}`);
   }
   // 如果是开发环境
-  const localInitPath = path.resolve(__dirname, '../../init');
+  const localInitPath = path.resolve(__dirname, "../../init");
   if (fs.existsSync(localInitPath)) {
     config.isDev = true;
-    config.devPackagePath = localInitPath;
+    config.initDevPackagePath = localInitPath;
   }
 }
 
