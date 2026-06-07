@@ -10,9 +10,9 @@ const { log, locale, npm } = require("@ttn-cli/utils");
 const packageConfig = require("../package.json");
 
 // 常量定义
-const LOWEST_NODE_VERSION = '20.0.0';
-const NPM_NAME = '@ttn-cli/core';
-const DEPENDENCIES_PATH = 'dependencies';
+const LOWEST_NODE_VERSION = "20.0.0";
+const NPM_NAME = "@ttn-cli/core";
+const DEPENDENCIES_PATH = "dependencies";
 
 module.exports = cli;
 
@@ -21,7 +21,14 @@ let config; // 环境变量配置
 
 async function cli() {
   try {
-    // 脚手架准备阶段
+    const isVersionOrHelp = ["-V", "--version", "-h", "--help"].some((arg) =>
+      process.argv.includes(arg),
+    );
+    if (isVersionOrHelp) {
+      registerCommand();
+      return;
+    }
+    // 只有执行核心业务命令（如 init）时，才触发繁重的准备工作
     await prepare();
     // 注册命令
     registerCommand();
@@ -34,14 +41,6 @@ async function cli() {
 // 注册指令
 function registerCommand() {
   program.version(packageConfig.version).usage("<command> [options]"); // 支持 ttn-cli -V
-  program
-    .command("desc")
-    .description("查看 ttn-cli 描述")
-    .action(() => {
-      log.success("欢迎使用 ttn-cli");
-      log.success("官网链接", "https://ttn-ecosystem.github.io/ttn-docs/");
-      log.success("作者介绍", "code-YuJun");
-    });
 
   program
     .command("init [type]")
@@ -75,7 +74,10 @@ function registerCommand() {
 }
 
 // 命令包执行器 ，负责 动态加载和执行
-async function execCommand({ packagePath, packageName, packageVersion }, extraOptions) {
+async function execCommand(
+  { packagePath, packageName, packageVersion },
+  extraOptions,
+) {
   let rootFile;
   try {
     if (packagePath) {
@@ -95,7 +97,7 @@ async function execCommand({ packagePath, packageName, packageVersion }, extraOp
       const packageDir = `${DEPENDENCIES_PATH}`; // dependencies
       const targetPath = path.resolve(cliHome, packageDir); // '/Users/qiangyujun/.ttn-cli/dependencies'
       // 全局包缓存路径
-      const storePath = path.resolve(targetPath, 'node_modules'); // '/Users/qiangyujun/.ttn-cli/dependencies/node_modules'
+      const storePath = path.resolve(targetPath, "node_modules"); // '/Users/qiangyujun/.ttn-cli/dependencies/node_modules'
       const initPackage = new Package({
         targetPath,
         storePath,
@@ -116,18 +118,18 @@ async function execCommand({ packagePath, packageName, packageVersion }, extraOp
     if (fs.existsSync(rootFile)) {
       const code = `require('${rootFile}')(${JSON.stringify(_config)})`;
       // 通过 node -e 动态执行入口文件
-      const p = exec('node', ['-e', code], { 'stdio': 'inherit' }); // node -e "require('xxx')(config)"
-      p.on('error', e => {
-        log.verbose('命令执行失败:', e);
+      const p = exec("node", ["-e", code], { stdio: "inherit" }); // node -e "require('xxx')(config)"
+      p.on("error", (e) => {
+        log.verbose("命令执行失败:", e);
         handleError(e);
         process.exit(1);
       });
-      p.on('exit', c => {
-        log.verbose('命令执行成功:', c);
+      p.on("exit", (c) => {
+        log.verbose("命令执行成功:", c);
         process.exit(c);
       });
     } else {
-      throw new Error('入口文件不存在，请重试！');
+      throw new Error("入口文件不存在，请重试！");
     }
   } catch (e) {
     log.error(e.message);
