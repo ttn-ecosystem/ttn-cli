@@ -24,6 +24,7 @@ async function cli() {
   try {
     // 脚手架准备阶段
     await prepare();
+    // 注册命令
     registerCommand();
   } catch (error) {
     log.error(error.message);
@@ -160,6 +161,7 @@ function checkNodeVersion() {
 
 function checkRoot() {
   const rootCheck = require("root-check");
+  // rootCheck() 执行后会自动将进程从 root 用户切换回执行 sudo 命令的普通用户
   rootCheck();
 }
 
@@ -178,12 +180,12 @@ function checkInputArgs() {
   log.verbose("输入参数", args);
 }
 
-// 用户名、密码等都在环境变量中存储，避免直接在代码中硬编码
+// 检查/加载 环境变量
 function checkEnv() {
   log.verbose("开始检查环境变量");
-  // 从 .env 文件中加载环境变量到 process.env
-  // 如果 .env 中写了：CLI_HOMEAAA=my-cli，那就可以从 process.env.CLI_HOMEAAA 中获取到 my-cli 这个值
-  const dotenv = require("dotenv"); // API 密钥、用户名密码
+  // 将 .env 文件中加载环境变量到 process.env，.env 中可以存放API 密钥、用户名密码
+  // 如果 .env 中写了：CLI_HOME=my-cli，那就可以从 process.env.CLI_HOME 中获取到 my-cli 这个值
+  const dotenv = require("dotenv");
   dotenv.config({
     path: path.resolve(userHome, ".env"),
   });
