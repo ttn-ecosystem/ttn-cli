@@ -9,11 +9,10 @@ const semver = require("semver");
 const { log, locale, npm } = require("@ttn-cli/utils");
 const packageConfig = require("../package.json");
 
-const {
-  LOWEST_NODE_VERSION,
-  NPM_NAME,
-  DEPENDENCIES_PATH,
-} = require("./const");
+// 常量定义
+const LOWEST_NODE_VERSION = '20.0.0';
+const NPM_NAME = '@ttn-cli/core';
+const DEPENDENCIES_PATH = 'dependencies';
 
 module.exports = cli;
 
