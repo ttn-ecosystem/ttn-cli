@@ -14,45 +14,47 @@ const TEMPLATE_TYPE_CUSTOM = 'custom';
 const DEFAULT_TYPE = TYPE_PROJECT;
 
 async function init(options) {
-  try {
-    // 设置要创建的项目安装的路径
-    let targetPath = process.cwd();
-    if (!options.targetPath) {
-      options.targetPath = targetPath;
-    }
-    log.verbose('init', options);
+  console.log('@ttn-cli/init 包执行了');
+  console.log('options', options);
+  // try {
+  //   // 设置要创建的项目安装的路径
+  //   let targetPath = process.cwd();
+  //   if (!options.targetPath) {
+  //     options.targetPath = targetPath;
+  //   }
+  //   log.verbose('init', options);
 
-    // 完成项目初始化的准备和校验工作
-    const result = await prepare(options);
-    if (!result) {
-      log.info('创建项目终止');
-      return;
-    }
+  //   // 完成项目初始化的准备和校验工作
+  //   const result = await prepare(options);
+  //   if (!result) {
+  //     log.info('创建项目终止');
+  //     return;
+  //   }
 
-    // 获取项目模板列表
-    const { templateList, project } = result;
+  //   // 获取项目模板列表
+  //   const { templateList, project } = result;
 
-    // 下载项目模板
-    const template = await downloadTemplate(templateList, options);
-    log.verbose('template', template);
+  //   // 下载项目模板
+  //   const template = await downloadTemplate(templateList, options);
+  //   log.verbose('template', template);
 
-    // 模板安装阶段
-    if (template.type === TEMPLATE_TYPE_NORMAL) {
-      await installTemplate(template, project, options);
-    } else if (template.type === TEMPLATE_TYPE_CUSTOM) {
-      await installCustomTemplate(template, project, options);
-    } else {
-      throw new Error('未知的模板类型！');
-    }
-  } catch (e) {
-    if (options.debug) {
-      log.error('Error:', e.stack);
-    } else {
-      log.error('Error:', e.message);
-    }
-  } finally {
-    process.exit(0);
-  }
+  //   // 模板安装阶段
+  //   if (template.type === TEMPLATE_TYPE_NORMAL) {
+  //     await installTemplate(template, project, options);
+  //   } else if (template.type === TEMPLATE_TYPE_CUSTOM) {
+  //     await installCustomTemplate(template, project, options);
+  //   } else {
+  //     throw new Error('未知的模板类型！');
+  //   }
+  // } catch (e) {
+  //   if (options.debug) {
+  //     log.error('Error:', e.stack);
+  //   } else {
+  //     log.error('Error:', e.message);
+  //   }
+  // } finally {
+  //   process.exit(0);
+  // }
 }
 
 // 自定义模板安装 installCustomTemplate

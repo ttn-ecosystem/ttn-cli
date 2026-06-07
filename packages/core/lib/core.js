@@ -40,20 +40,20 @@ async function cli() {
 
 // 注册指令
 function registerCommand() {
-  program.version(packageConfig.version).usage("<command> [options]"); // 支持 ttn-cli -V
-
+  // 支持 ttn-cli -V / --version
+  program.version(packageConfig.version).usage("<command> [options]");
+  
   program
-    .command("init [type]")
+    .command("init")
     .description("项目初始化")
-    // 判断是否去执行本地代码
-    .option("--packagePath <packagePath>", "手动指定init包路径") // 允许用户手动指定 init 包的本地路径（用于开发调试）
+    .option("--packagePath <packagePath>", "手动指定init包路径")
     .option("--force", "是否强制初始化项目")
-    .action(async (type, { packagePath, force }) => {
+    .action(async ({ packagePath, force }) => {
       const packageName = "@ttn-cli/init";
       const packageVersion = "1.0.0";
       await execCommand(
         { packagePath, packageName, packageVersion },
-        { type, force },
+        { force },
       );
     });
 
