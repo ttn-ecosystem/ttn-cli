@@ -5,6 +5,7 @@ const path = require("path");
 const userHome = require("user-home");
 const colors = require("colors/safe");
 const program = require("commander");
+const semver = require("semver");
 const { log, locale, npm } = require("@ttn-cli/utils");
 const packageConfig = require("../package.json");
 
@@ -150,7 +151,6 @@ function checkPkgVersion() {
 }
 
 function checkNodeVersion() {
-  const semver = require("semver");
   log.notice("当前 Node.js 版本:", process.version);
   if (!semver.gte(process.version, LOWEST_NODE_VERSION)) {
     log.error(`ttn-cli 需要安装 v${LOWEST_NODE_VERSION} 以上版本的 Node.js`);
@@ -179,21 +179,23 @@ function checkInputArgs() {
   log.verbose("输入参数", args);
 }
 
-// 检查/加载 环境变量
+// 加载环境变量
 function checkEnv() {
   log.verbose("开始检查环境变量");
   // 将 .env 文件中加载环境变量到 process.env，.env 中可以存放API 密钥、用户名密码
   // 如果 .env 中写了：CLI_HOME=my-cli，那就可以从 process.env.CLI_HOME 中获取到 my-cli 这个值
   const dotenv = require("dotenv");
-  dotenv.config({
+  const result = dotenv.config({
     path: path.resolve(userHome, ".env"),
   });
+  if (result.error) {
+    log.verbose(`环境变量加载失败: ${result.error.message}`);
+  }
 }
 
 // 提示用户更新最新版本的脚手架
 async function checkGlobalUpdate() {
   log.verbose("检查 ttn-cli 最新版本");
-  const semver = require("semver");
   const currentVersion = packageConfig.version;
   try {
     // 获取当前脚手架的最新版本
