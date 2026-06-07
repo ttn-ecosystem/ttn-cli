@@ -2,7 +2,13 @@
   "name": "ttn-cli",
   "description": "脚手架工程",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@9.0.0",
   "scripts": {
+    "preinstall": "node -e \"if(process.env.npm_execpath.indexOf('pnpm') === -1) { console.error('❌ 请使用 pnpm 而非 npm/yarn 来安装依赖！'); process.exit(1); }\"",
     "build": "pnpm -r run build",
     "dev": "pnpm -r --parallel run dev",
     "test": "pnpm -r run test",

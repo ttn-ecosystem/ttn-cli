@@ -19,6 +19,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "test": "node ./__tests__/@ttn-cli/core.test.js"
   },
