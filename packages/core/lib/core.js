@@ -10,7 +10,6 @@ const packageConfig = require("../package.json");
 
 const {
   LOWEST_NODE_VERSION,
-  DEFAULT_CLI_HOME,
   NPM_NAME,
   DEPENDENCIES_PATH,
 } = require("./const");
@@ -194,16 +193,14 @@ function checkEnv() {
 // 提示用户更新最新版本的脚手架
 async function checkGlobalUpdate() {
   log.verbose("检查 ttn-cli 最新版本");
+  const semver = require("semver");
   const currentVersion = packageConfig.version;
   try {
     // 获取当前脚手架的最新版本
-    const lastVersion = await npm.getNpmLatestSemverVersion(
-      NPM_NAME,
-      currentVersion,
-    );
+    const lastVersion = await npm.getLatestVersion(NPM_NAME);
     if (lastVersion && semver.gt(lastVersion, currentVersion)) {
       log.warn(
-        colors.yellow(`请手动更新 ${NPM_NAME}，当前版本：${packageConfig.version}，最新版本：${lastVersion}
+        colors.yellow(`请手动更新 ${NPM_NAME}，当前版本：${currentVersion}，最新版本：${lastVersion}
                 更新命令： npm install -g ${NPM_NAME}`),
       );
     }
