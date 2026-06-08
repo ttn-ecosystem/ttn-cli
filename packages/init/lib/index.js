@@ -21,10 +21,9 @@ async function init(options) {
     const { templateList, project } = result;
     // 下载项目模板
     const template = await downloadTemplate(templateList, options);
-    console.log('template', template);
     log.verbose('template', template);
     // 模板安装阶段
-    // await installTemplate(template, project, options);
+    await installTemplate(template, project, options);
   } catch (e) {
     if (options.debug) {
       log.error('Error:', e.stack);
@@ -49,58 +48,38 @@ async function npminstall(targetPath) {
   });
 }
 
-async function execStartCommand(targetPath, startCommand) {
-  return new Promise((resolve, reject) => {
-    const p = exec(startCommand[0], startCommand.slice(1), { stdio: 'inherit', cwd: targetPath });
-    p.on('error', e => {
-      reject(e);
-    });
-    p.on('exit', c => {
-      resolve(c);
-    });
-  });
-}
-
 async function installTemplate(template, ejsData, options) {
   // 安装模板
   let spinnerStart = spinner(`正在安装模板...`);
   await sleep(1000);
-  // 将模板目录复制到目标目录
+  // 将模板文件目录复制到目标目录
   const sourceDir = template.path;
+  // 要在哪个目录下创建项目
   const targetDir = options.targetPath;
+  // 确保 sourceDir 这个目录存在；不存在就创建（递归创建多级也行）
   fse.ensureDirSync(sourceDir);
   fse.ensureDirSync(targetDir);
+  // 把 sourceDir 下的所有文件和子目录递归复制到 targetDir
   fse.copySync(sourceDir, targetDir);
 
   spinnerStart.stop(true);
   log.success('模板安装成功');
 
   // 对模板文件进行 EJS 渲染，将用户输入的项目信息注入到模板中
-  const ejsIgnoreFiles = [
-    '**/node_modules/**',
-    '**/.git/**',
-    '**/.vscode/**',
-    '**/.DS_Store',
-  ];
-  if (template.ignore) {
-    ejsIgnoreFiles.push(...template.ignore);
-  }
-  log.verbose('ejsData', ejsData);
-  await ejs(targetDir, ejsData, {
-    ignore: ejsIgnoreFiles,
-  });
-
+  // const ejsIgnoreFiles = [
+  //   '**/node_modules/**',
+  //   '**/.git/**',
+  //   '**/.vscode/**',
+  //   '**/.DS_Store',
+  // ];
+  // log.verbose('ejsData', ejsData);
+  // await ejs(targetDir, ejsData, {
+  //   ignore: ejsIgnoreFiles,
+  // });
   // 安装依赖文件
   log.notice('开始安装依赖');
   await npminstall(targetDir); // 调用 npm install 安装项目依赖
-  log.success('依赖安装成功');
-
-  // 如果模板定义了启动命令，则执行该命令
-  if (template.startCommand) {
-    log.notice('开始执行启动命令');
-    const startCommand = template.startCommand.split(' ');
-    await execStartCommand(targetDir, startCommand);
-  }
+  log.success('依赖安装成功，请执行项目目录下的启动命令');
 }
 
 async function downloadTemplate(templateList, options) {
