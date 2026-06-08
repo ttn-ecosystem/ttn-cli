@@ -24,11 +24,12 @@ async function cli() {
     const isVersionOrHelp = ["-V", "--version", "-h", "--help"].some((arg) =>
       process.argv.includes(arg),
     );
-    if (isVersionOrHelp) {
+    // 只有执行核心业务命令（如 init）时，才触发繁重的准备工作
+    const hasNoArgs = process.argv.slice(2).length === 0;
+    if (isVersionOrHelp || hasNoArgs) {
       registerCommand();
       return;
     }
-    // 只有执行核心业务命令（如 init）时，才触发繁重的准备工作
     await prepare();
     // 注册命令
     registerCommand();
