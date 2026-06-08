@@ -66,16 +66,16 @@ async function installTemplate(template, ejsData, options) {
   log.success('模板安装成功');
 
   // 对模板文件进行 EJS 渲染，将用户输入的项目信息注入到模板中
-  // const ejsIgnoreFiles = [
-  //   '**/node_modules/**',
-  //   '**/.git/**',
-  //   '**/.vscode/**',
-  //   '**/.DS_Store',
-  // ];
-  // log.verbose('ejsData', ejsData);
-  // await ejs(targetDir, ejsData, {
-  //   ignore: ejsIgnoreFiles,
-  // });
+  const ejsIgnoreFiles = [
+    '**/node_modules/**',
+    '**/.git/**',
+    '**/.vscode/**',
+    '**/.DS_Store',
+  ];
+  log.verbose('ejsData', ejsData);
+  await ejs(targetDir, ejsData, {
+    ignore: ejsIgnoreFiles,
+  });
   // 安装依赖文件
   log.notice('开始安装依赖');
   await pnpminstall(targetDir);
@@ -139,7 +139,7 @@ async function downloadTemplate(templateList, options) {
 async function prepare(options) {
   // 目录空检查：读取当前目录，过滤掉 node_modules 、 .git 、 .DS_Store ，如果目录不为空则询问用户是否继续。
   let fileList = fs.readdirSync(process.cwd());
-  fileList = fileList.filter(file => ['node_modules', '.git', '.DS_Store'].indexOf(file) < 0);
+  fileList = fileList.filter(file => ['node_modules', '.git', '.DS_Store', '.vscode'].indexOf(file) < 0);
   log.verbose('fileList', fileList);
   let continueWhenDirNotEmpty = true;
   if (fileList && fileList.length > 0) { // 判断当前目录是否为空
@@ -180,7 +180,7 @@ async function prepare(options) {
   return {
     templateList,
     project: {
-      name: projectName
+      projectName:projectName
     },
   };
 }
