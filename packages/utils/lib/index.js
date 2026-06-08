@@ -2,6 +2,7 @@
 
 const log = require("./log");
 const npm = require("./npm");
+const exec = require("./exec");
 const file = require("./file");
 const request = require("./request");
 const spinner = require("./spinner");
@@ -29,4 +30,5 @@ module.exports = {
   inquirer,
   Package,
   ejs,
+  exec,
 };

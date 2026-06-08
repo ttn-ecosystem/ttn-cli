@@ -6,7 +6,7 @@ const userHome = require("user-home");
 const colors = require("colors/safe");
 const program = require("commander");
 const semver = require("semver");
-const { log, locale, npm, Package } = require("@ttn-cli/utils");
+const { log, locale, npm, Package, exec } = require("@ttn-cli/utils");
 const packageConfig = require("../package.json");
 
 // 常量定义
@@ -24,8 +24,8 @@ async function cli() {
     const isVersionOrHelp = ["-V", "--version", "-h", "--help"].some((arg) =>
       process.argv.includes(arg),
     );
-    // 只有执行核心业务命令（如 init）时，才触发繁重的准备工作
     const hasNoArgs = process.argv.slice(2).length === 0;
+    // 原指令 / ttn-cli 无参数，输出 help 帮助信息
     if (isVersionOrHelp || hasNoArgs) {
       registerCommand();
       return;
@@ -43,7 +43,6 @@ async function cli() {
 function registerCommand() {
   // 支持 ttn-cli -V / --version
   program.version(packageConfig.version).usage("<command> [options]");
-
   program
     .command("init")
     .description("项目初始化")
@@ -53,7 +52,6 @@ function registerCommand() {
       const packageVersion = "1.0.0";
       await execCommand({ packageName, packageVersion }, { force });
     });
-
   // 处理未知命令
   program.on("command:*", function (args) {
     const availableCommands = program.commands.map((cmd) => cmd.name());
@@ -62,7 +60,6 @@ function registerCommand() {
     process.exit(1);
   });
   program.option("--debug", "打开调试模式").parse(process.argv);
-
   // 直接输入 ttn-cli 没有子命令时，输出 help 帮助信息
   if (program.args && program.args.length < 1) {
     program.outputHelp();
@@ -105,16 +102,13 @@ async function execCommand({ packageName, packageVersion }, extraOptions) {
         version: packageVersion,
       });
       rootFile = execPackage.getRootFilePath(true);
-    } else {
-
-    }
-
+    } else {}
+    // 组合成一个完整的对象 {...}
     const _config = Object.assign({}, config, extraOptions, {
       debug: args.debug,
     });
     if (fs.existsSync(rootFile)) {
       const code = `require('${rootFile}')(${JSON.stringify(_config)})`;
-      // 通过 node -e 动态执行入口文件
       const p = exec("node", ["-e", code], { stdio: "inherit" }); // node -e "require('xxx')(config)"
       p.on("error", (e) => {
         log.verbose("命令执行失败:", e);
