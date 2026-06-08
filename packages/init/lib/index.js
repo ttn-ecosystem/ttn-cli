@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const fse = require('fs-extra');
-const { log, inquirer, spinner, Package, sleep, exec, formatName, formatClassName, ejs } = require('@ttn-cli/utils');
+const { log, inquirer, spinner, Package, sleep, exec, formatName, ejs } = require('@ttn-cli/utils');
 const getProjectTemplate = require('./getProjectTemplate');
 
 async function init(options) {
@@ -169,22 +169,18 @@ async function prepare(options) {
   }
   // 获取项目/组件名称
   let projectName = '';
-  let className = '';
   // 获取项目名称
   while (!projectName) {
     projectName = await getProjectName();
     if (projectName) {
       projectName = formatName(projectName); // 格式化为 kebab-case
-      className = formatClassName(projectName); // 格式化为 PascalCase
     }
     log.verbose('name', projectName);
-    log.verbose('className', className);
   }
   return {
     templateList,
     project: {
-      name: projectName,
-      className,
+      name: projectName
     },
   };
 }
