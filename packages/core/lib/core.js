@@ -12,12 +12,20 @@ const packageConfig = require("../package.json");
 // 常量定义
 const LOWEST_NODE_VERSION = "20.0.0";
 const NPM_NAME = "@ttn-cli/core";
+const DEFAULT_CLI_HOME = '.ttn-cli';
+// 脚手架内部依赖包存在的目录
 const DEPENDENCIES_PATH = "dependencies";
+let isDev = false;
+let initDevPackagePath = '';
 
 module.exports = cli;
 
 let args; // 命令行参数
-let config = {}; // 环境变量配置
+let config = {
+  // ~/.ttn-cli/
+  // 脚手架自身的一些依赖，都在 用户根目录下
+  cliHome: path.join(userHome, DEFAULT_CLI_HOME),
+};
 
 async function cli() {
   try {
@@ -92,12 +100,12 @@ async function execCommand({ packageName, packageVersion }, extraOptions) {
     //   }
     //   rootFile = initPackage.getRootFilePath();
     // }
-    if (config.isDev) {
+    if (isDev) {
       const execPackage = new Package({
         // 包安装目标路径
-        targetPath: config.initDevPackagePath,
+        targetPath: initDevPackagePath,
         // 全局包缓存路径
-        storePath: config.initDevPackagePath,
+        storePath: initDevPackagePath,
         name: packageName,
         version: packageVersion,
       });
@@ -188,8 +196,8 @@ function checkEnv() {
   // 如果是开发环境
   const localInitPath = path.resolve(__dirname, "../../init");
   if (fs.existsSync(localInitPath)) {
-    config.isDev = true;
-    config.initDevPackagePath = localInitPath;
+    isDev = true;
+    initDevPackagePath = localInitPath;
   }
 }
 

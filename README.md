@@ -29,3 +29,11 @@ cd my-project
 ```Bash
 ttn-cli init
 ```
+
+
+
+### ttn-cli 动态加载包的存储方案
+针对脚手架运行时动态下载内部依赖包的场景，强烈建议放在用户目录下的全局缓存，而不是项目目录或脚手架安装目录。
+
+- ~/.ttn-cli/template/ 存储模板包
+- ~/.ttn-cli/dependencies/ 存储内部依赖包

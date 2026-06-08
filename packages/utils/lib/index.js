@@ -4,6 +4,7 @@ const log = require("./log");
 const npm = require("./npm");
 const exec = require("./exec");
 const file = require("./file");
+const sleep = require("./sleep");
 const request = require("./request");
 const spinner = require("./spinner");
 const formatPath = require("./formatPath");
@@ -31,4 +32,5 @@ module.exports = {
   Package,
   ejs,
   exec,
+  sleep,
 };

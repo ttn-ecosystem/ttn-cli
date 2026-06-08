@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const BASE_URL = 'http://book.youbaobao.xyz:7002';
+const BASE_URL = 'http://localhost:3000';
 
 const service = axios.create({
   baseURL: BASE_URL,
@@ -18,7 +18,7 @@ service.interceptors.request.use(
 
 service.interceptors.response.use(
   response => {
-    return response.data;
+    return response.data.data;
   },
   error => {
     return Promise.reject(error);

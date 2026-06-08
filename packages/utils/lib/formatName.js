@@ -1,3 +1,7 @@
+function firstUpperCase(str) {
+  return str.replace(/^\S/, s => s.toUpperCase());
+}
+
 function camelTrans(str, isBig) {
   let i = isBig ? 0 : 1;
   str = str.split('-');
