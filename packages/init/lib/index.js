@@ -21,6 +21,7 @@ async function init(options) {
     const { templateList, project } = result;
     // 下载项目模板
     const template = await downloadTemplate(templateList, options);
+    console.log('template', template);
     log.verbose('template', template);
     // 模板安装阶段
     // await installTemplate(template, project, options);
@@ -138,20 +139,22 @@ async function downloadTemplate(templateList, options) {
     spinnerStart.stop(true);
     log.success('更新模板成功');
   }
-  // 构建模板路径
-  // 验证模板目录存在，然后返回包含完整路径信息的模板对象
-  // const templateSourcePath = templatePkg.npmFilePath;
-  // const templatePath = path.resolve(templateSourcePath, 'template');
-  // log.verbose('template path', templatePath);
-  // if (!fs.existsSync(templatePath)) {
-  //   throw new Error(`[${templateName}]项目模板不存在！`);
-  // }
-  // const template = {
-  //   ...selectedTemplate,
-  //   path: templatePath,
-  //   sourcePath: templateSourcePath,
-  // };
-  // return template;
+  // 验证模板目录是否存在
+  const templateSourcePath = templatePkg.npmFilePath;
+  const templatePath = path.resolve(templateSourcePath, 'template');
+  log.verbose('template path', templatePath);
+  if (!fs.existsSync(templatePath)) {
+    throw new Error(`[${templateName}]项目模板不存在！`);
+  }
+  const template = {
+    // name / version
+    ...selectedTemplate,
+    // 模板路径,里面就是 template 目录下的文件目录
+    path: templatePath,
+    // 模板源路径，包括 readme.md 和 template 目录
+    sourcePath: templateSourcePath,
+  };
+  return template;
 }
 
 async function prepare(options) {
