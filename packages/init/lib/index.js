@@ -35,10 +35,10 @@ async function init(options) {
   }
 }
 
-// 执行 npm install ，使用淘宝镜像加速
-async function npminstall(targetPath) {
+// 执行 pnpm install ，使用淘宝镜像加速
+async function pnpminstall(targetPath) {
   return new Promise((resolve, reject) => {
-    const p = exec('npm', ['install', '--registry=https://registry.npm.taobao.org'], { stdio: 'inherit', cwd: targetPath });
+    const p = exec('pnpm', ['install', '--registry=https://registry.npmmirror.com'], { stdio: 'inherit', cwd: targetPath });
     p.on('error', e => {
       reject(e);
     });
@@ -78,7 +78,7 @@ async function installTemplate(template, ejsData, options) {
   // });
   // 安装依赖文件
   log.notice('开始安装依赖');
-  await npminstall(targetDir); // 调用 npm install 安装项目依赖
+  await pnpminstall(targetDir);
   log.success('依赖安装成功，请执行项目目录下的启动命令');
 }
 
