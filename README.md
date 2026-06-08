@@ -30,7 +30,10 @@ cd my-project
 ttn-cli init
 ```
 
-
+### 创建一个新lerna包
+```Bash
+lerna create my-package
+```
 
 ### ttn-cli 动态加载包的存储方案
 针对脚手架运行时动态下载内部依赖包的场景，强烈建议放在用户目录下的全局缓存，而不是项目目录或脚手架安装目录。
