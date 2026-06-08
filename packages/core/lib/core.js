@@ -102,7 +102,9 @@ async function execCommand({ packageName, packageVersion }, extraOptions) {
         version: packageVersion,
       });
       rootFile = execPackage.getRootFilePath(true);
-    } else {}
+    } else {
+      // TODO
+    }
     // 组合成一个完整的对象 {...}
     const _config = Object.assign({}, config, extraOptions, {
       debug: args.debug,
