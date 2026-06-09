@@ -17,6 +17,9 @@ importers:
       '@ttn-cli/init':
         specifier: workspace:*
         version: link:../init
+      '@ttn-cli/publish':
+        specifier: workspace:*
+        version: link:../publish
       '@ttn-cli/utils':
         specifier: workspace:*
         version: link:../utils
@@ -50,6 +53,8 @@ importers:
       fs-extra:
         specifier: ^9.0.1
         version: 9.1.0
+
+  packages/publish: {}
 
   packages/utils:
     dependencies:

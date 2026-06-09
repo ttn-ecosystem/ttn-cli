@@ -3,5 +3,5 @@
 module.exports = publish;
 
 function publish() {
-  return 'Hello from publish';
+  console.log('publish');
 }
