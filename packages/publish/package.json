@@ -24,6 +24,7 @@
     "test": "node ./__tests__/publish.test.js"
   },
   "dependencies": {
+    "fs-extra": "^9.0.1",
     "@ttn-cli/utils": "workspace:*"
   }
 }
