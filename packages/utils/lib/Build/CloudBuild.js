@@ -3,7 +3,7 @@
 const WebSocket = require("ws");
 const log = require("../log");
 
-const WS_SERVER = "ws://localhost:3000";
+const WS_SERVER = "ws://localhost:3000/ws";
 class CloudBuild {
   constructor(options = {}) {
     this.options = options;
@@ -24,16 +24,16 @@ class CloudBuild {
     this.ws = new WebSocket(WS_SERVER);
     this.ws.on("open", () => {
       log.notice("云构建任务初始化成功");
+      this.ws.send(JSON.stringify(this.options));
     });
     this.ws.on("message", (data) => {
-      // data 是 Buffer，要转字符串
-      //   log.notice("收到:", data.toString());
+      log.notice("云构建任务收到:", data.toString());
     });
     this.ws.on("close", (code, reason) => {
-      log.notice("断开:", code, reason.toString());
+      log.notice("云构建任务断开:", code, reason.toString());
     });
     this.ws.on("error", (err) => {
-      log.error("出错:", err);
+      log.error("云构建任务出错:", err.message);
     });
   };
 }
