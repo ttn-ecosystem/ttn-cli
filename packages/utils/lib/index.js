@@ -4,6 +4,7 @@ const log = require("./log");
 const npm = require("./npm");
 const exec = require("./exec");
 const file = require("./file");
+const Git = require("./Git/Git.js");
 const sleep = require("./sleep");
 const request = require("./request");
 const spinner = require("./spinner");
@@ -26,6 +27,7 @@ module.exports = {
   spinner,
   terminalLink,
   formatName,
+  Git,
   inquirer,
   Package,
   ejs,

@@ -54,7 +54,11 @@ importers:
         specifier: ^9.0.1
         version: 9.1.0
 
-  packages/publish: {}
+  packages/publish:
+    dependencies:
+      '@ttn-cli/utils':
+        specifier: workspace:*
+        version: link:../utils
 
   packages/utils:
     dependencies:
