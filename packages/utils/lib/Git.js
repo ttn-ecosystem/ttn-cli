@@ -20,6 +20,29 @@ class Git {
       return null; // 不是 git 仓库
     }
   }
+  // 获取 git 远程地址和分支信息
+  getGitInfo() {
+    let remoteUrl = ''
+    try {
+      // 获取远程仓库地址
+      try {
+        remoteUrl = execSync('git remote get-url origin', { encoding: 'utf-8' }).trim();
+      } catch (err) {
+        throw new Error('获取项目 git 远程地址失败');
+      }
+      // 获取当前分支
+      const branch = execSync('git symbolic-ref --short HEAD', { encoding: 'utf-8' }).trim();
+      return {
+        remoteUrl,
+        branch,
+      };
+    } catch {
+      return {
+        remoteUrl,
+        branch: '',
+      };
+    }
+  }
   // 检查 git 仓库状态
   checkStatus() {
     if (!this.status) {

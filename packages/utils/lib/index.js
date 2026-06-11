@@ -13,6 +13,7 @@ const terminalLink = require("./terminalLink");
 const formatName = require("./formatName");
 const inquirer = require('./inquirer');
 const locale = require("./Locale/loadLocale");
+const CloudBuild = require("./Build/CloudBuild.js");
 
 const Package = require('./Package');
 const ejs = require('./ejs');
@@ -33,4 +34,5 @@ module.exports = {
   ejs,
   exec,
   sleep,
+  CloudBuild,
 };
