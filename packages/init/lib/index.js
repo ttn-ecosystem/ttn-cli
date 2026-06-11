@@ -163,7 +163,7 @@ async function prepare(options) {
     }
   }
   // 获取模板列表
-  let templateList = await getProjectTemplate();
+  let { templateList } = await getProjectTemplate();
   if (!templateList || templateList.length === 0) {
     throw new Error('项目模板列表获取失败');
   }

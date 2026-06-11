@@ -40,3 +40,9 @@ lerna create my-package
 
 - ~/.ttn-cli/template/ 存储模板包
 - ~/.ttn-cli/dependencies/ 存储内部依赖包
+
+### 域名查询
+https://dc.console.aliyun.com/next/index?spm=5176.27097949.J_9138996270.6.68944b59zJR0Qk#/domain-list/all?type=
+
+### redis
+https://chatgpt.com/c/6a2942b0-e970-83e8-b2e5-364954d86857
