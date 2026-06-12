@@ -3,9 +3,30 @@
 const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
-const { Git, log, CloudBuild } = require('@ttn-cli/utils');
+const { Git, log, CloudBuild, inquirer } = require('@ttn-cli/utils');
 
-async function publish() {
+// 发布HTML模板代码
+async function uploadTemplate() {
+
+}
+
+async function publish(options = {}) {
+  const { pre = false } = options;
+  // 发布到线上环境
+  const env = pre ? 'pre' : 'prod';
+  // 如果是生产环境，需要用户确认
+  if (env === 'prod') {
+    const confirm = await inquirer({
+      type: 'confirm',
+      message: '确认部署到线上生产环境吗？',
+      defaultValue: false,
+    });
+    if (!confirm) {
+      log.info('已取消发布');
+      process.exit(0);
+    }
+  }
+  let buildRet = false;
   const startTime = new Date().getTime();
   // 检查项目的基本信息
   const projectInfo = checkProjectInfo();
@@ -31,10 +52,14 @@ async function publish() {
   }
   // 云构建+云发布
   const cloudBuild = new CloudBuild({
-    name, version, dir, scripts, remoteUrl, branch,
+    name, version, dir, scripts, remoteUrl, branch, env,
   });
   await cloudBuild.prepare();
   await cloudBuild.init();
+  buildRet = await cloudBuild.build();
+  if (buildRet) {
+    await this.uploadTemplate();
+  }
   const endTime = new Date().getTime();
   log.info('本次发布耗时：', Math.floor((endTime - startTime) / 1000) + '秒');
 }
@@ -46,7 +71,6 @@ function checkProjectInfo() {
     throw new Error('package.json不存在');
   }
   const pkg = fse.readJsonSync(pkgPath);
-  console.log('pkg', pkg);
   const { name, version, scripts } = pkg;
   return { name, version, dir: projectPath, scripts };
 }

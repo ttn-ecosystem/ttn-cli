@@ -46,3 +46,13 @@ https://dc.console.aliyun.com/next/index?spm=5176.27097949.J_9138996270.6.68944b
 
 ### redis
 https://chatgpt.com/c/6a2942b0-e970-83e8-b2e5-364954d86857
+
+### publish
+- 线上环境部署项目
+```Bash
+ttn-cli publish
+```
+- 语法环境部署项目
+```Bash
+ttn-cli publish --pre
+```

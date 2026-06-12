@@ -62,10 +62,11 @@ function registerCommand() {
   program
     .command("publish")
     .description("发布项目")
-    .action(async () => {
+    .option("--pre", "是否发布到预发环境")
+    .action(async ({ pre }) => {
       const packageName = "@ttn-cli/publish";
       const packageVersion = "1.0.0";
-      await execCommand({ packageName, packageVersion });
+      await execCommand({ packageName, packageVersion }, { pre });
     });
   // 处理未知命令
   program.on("command:*", function (args) {

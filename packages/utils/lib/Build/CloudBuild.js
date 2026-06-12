@@ -21,21 +21,39 @@ class CloudBuild {
   // 建立云构建连接
   init = () => {
     log.notice("开始云构建任务初始化");
-    this.ws = new WebSocket(WS_SERVER);
-    this.ws.on("open", () => {
-      log.notice("云构建任务初始化成功");
-      this.ws.send(JSON.stringify(this.options));
-    });
-    this.ws.on("message", (data) => {
-      log.notice("云构建任务收到:", data.toString());
-    });
-    this.ws.on("close", (code, reason) => {
-      log.notice("云构建任务断开:", code, reason.toString());
-    });
-    this.ws.on("error", (err) => {
-      log.error("云构建任务出错:", err.message);
-    });
+    return new Promise((resolve, reject) => {
+      this.ws = new WebSocket(WS_SERVER);
+      this.ws.on("open", () => {
+        log.notice("云构建任务初始化成功");
+        resolve();
+      });
+      this.ws.on("message", (data) => {
+        log.notice("云构建任务收到:", JSON.parse(data.toString()).message);
+      });
+      this.ws.on("close", (code, reason) => {
+        log.notice("云构建任务断开:", code, reason.toString());
+      });
+      this.ws.on("error", (err) => {
+        log.error("云构建任务出错:", err.message);
+        reject(err);
+      });
+    })
   };
+
+  build = () => {
+    return new Promise((resolve, reject) => {
+      // 发送 build 消息
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.ws.send(JSON.stringify({
+          type: "build",
+          payload: this.options,
+        }));
+      } else {
+        log.error("WebSocket 未连接，无法发送 build 消息");
+      }
+
+    });
+  }
 }
 
 module.exports = CloudBuild;
