@@ -1,40 +1,47 @@
-const { execSync } = require('child_process');
+const simpleGit = require("simple-git");
 
 class Git {
-  constructor() {
-    this.status = this.getGitStatus();
+  constructor(options = {}) {
+    const { cwd = process.cwd() } = options;
+    this.git = simpleGit(cwd);
+    this.status = null;
   }
-  // 获取 git 仓库状态
-  getGitStatus() {
+
+  async init() {
+    this.status = await this.getGitStatus();
+    return this;
+  }
+
+  async getGitStatus() {
     try {
-      // 获取当前分支
-      const branch = execSync('git symbolic-ref --short HEAD', { encoding: 'utf-8' }).trim();
-      // 未提交的变更（有输出 = 有未提交内容）
-      const uncommitted = execSync('git status --porcelain', { encoding: 'utf-8' }).trim();
+      const [branchResult, statusResult] = await Promise.all([
+        this.git.branch(),
+        this.git.status()
+      ]);
       return {
-        branch,
-        isMaster: ['master', 'main'].includes(branch),
-        hasUncommitted: uncommitted.length > 0,
+        branch: branchResult.current,
+        isMaster: ['master', 'main'].includes(branchResult.current),
+        hasUncommitted: statusResult.files.length > 0 || statusResult.staged.length > 0,
       };
     } catch {
-      return null; // 不是 git 仓库
+      return null;
     }
   }
-  // 获取 git 远程地址和分支信息
-  getGitInfo() {
-    let remoteUrl = ''
+
+  async getGitInfo() {
+    let remoteUrl = '';
     try {
-      // 获取远程仓库地址
-      try {
-        remoteUrl = execSync('git remote get-url origin', { encoding: 'utf-8' }).trim();
-      } catch (err) {
-        throw new Error('获取项目 git 远程地址失败');
+      const [remotes, branchResult] = await Promise.all([
+        this.git.getRemotes(true),
+        this.git.branch()
+      ]);
+      const origin = remotes.find(r => r.name === 'origin');
+      if (origin) {
+        remoteUrl = origin.refs.fetch;
       }
-      // 获取当前分支
-      const branch = execSync('git symbolic-ref --short HEAD', { encoding: 'utf-8' }).trim();
       return {
         remoteUrl,
-        branch,
+        branch: branchResult.current,
       };
     } catch {
       return {
@@ -43,7 +50,7 @@ class Git {
       };
     }
   }
-  // 检查 git 仓库状态
+
   checkStatus() {
     if (!this.status) {
       throw new Error('当前目录不是 git 仓库');
@@ -58,6 +65,3 @@ class Git {
 }
 
 module.exports = Git;
-
-// const git = new Git();
-// git.checkStatus();

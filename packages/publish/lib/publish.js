@@ -56,7 +56,7 @@ async function publish(options = {}) {
     process.exit(1);
   }
   // 检查 git 仓库状态
-  const git = new Git();
+  const git = await new Git().init();
   try{
     git.checkStatus();
   }catch(err){
@@ -64,7 +64,7 @@ async function publish(options = {}) {
     process.exit(1);
   }
   // 获取 git 远程地址和分支信息
-  const { remoteUrl, branch } = git.getGitInfo();
+  const { remoteUrl, branch } = await git.getGitInfo();
   if (!remoteUrl || !branch) {
     log.error('获取项目 git 信息失败');
     process.exit(1);
