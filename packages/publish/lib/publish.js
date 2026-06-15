@@ -10,9 +10,27 @@ async function uploadTemplate() {
 
 }
 
+function checkProjectInfo() {
+  const projectPath = process.cwd();
+  const pkgPath = path.resolve(projectPath, 'package.json');
+  if (!fs.existsSync(pkgPath)) {
+    throw new Error('package.json不存在');
+  }
+  const pkg = fse.readJsonSync(pkgPath);
+  const { name, version, scripts } = pkg;
+  // 获取 OSS config配置
+  const ossConfigPath = path.resolve(projectPath, 'ossConfig.json');
+  if (!fs.existsSync(ossConfigPath)) {
+    throw new Error('ossConfig.json不存在');
+  }
+  const ossConfig = fse.readJsonSync(ossConfigPath);
+  const { domain, previewDomain } = ossConfig;
+  return { name, version, dir: projectPath, scripts, domain, previewDomain };
+}
+
 async function publish(options = {}) {
+  // 获取要部署的环境
   const { pre = false } = options;
-  // 发布到线上环境
   const env = pre ? 'pre' : 'prod';
   // 如果是生产环境，需要用户确认
   if (env === 'prod') {
@@ -27,13 +45,14 @@ async function publish(options = {}) {
     }
   }
   let buildRet = false;
+  // 构建开始时间
   const startTime = new Date().getTime();
   // 检查项目的基本信息
   const projectInfo = checkProjectInfo();
   // 和项目相关的信息
-  const { name, version, dir, scripts } = projectInfo;
-  if (!scripts || !scripts.build) {
-    log.error('请在 package.json 中添加 build 脚本');
+  const { name, version, dir, scripts, domain, previewDomain } = projectInfo;
+  if (!(scripts && (scripts.build || scripts['build:prod']) && scripts['build:pre'])) {
+    log.error('请在 package.json 中添加 build:pre（预发环境）或 build:prod（生产环境）');
     process.exit(1);
   }
   // 检查 git 仓库状态
@@ -52,7 +71,7 @@ async function publish(options = {}) {
   }
   // 云构建+云发布
   const cloudBuild = new CloudBuild({
-    name, version, dir, scripts, remoteUrl, branch, env,
+    name, version, dir, scripts, remoteUrl, branch, env, domain, previewDomain,
   });
   await cloudBuild.prepare();
   await cloudBuild.init();
@@ -62,17 +81,6 @@ async function publish(options = {}) {
   }
   const endTime = new Date().getTime();
   log.info('本次发布耗时：', Math.floor((endTime - startTime) / 1000) + '秒');
-}
-
-function checkProjectInfo() {
-  const projectPath = process.cwd();
-  const pkgPath = path.resolve(projectPath, 'package.json');
-  if (!fs.existsSync(pkgPath)) {
-    throw new Error('package.json不存在');
-  }
-  const pkg = fse.readJsonSync(pkgPath);
-  const { name, version, scripts } = pkg;
-  return { name, version, dir: projectPath, scripts };
 }
 
 module.exports = publish;
