@@ -47,11 +47,19 @@ class CloudBuild {
           type: "build",
           payload: this.options,
         }));
-        resolve();
       } else {
         log.error("WebSocket 未连接，无法发送 build 消息");
         reject(new Error("WebSocket 未连接，无法发送 build 消息"));
       }
+      this.ws.on("close", (code, reason) => {
+        if (code === 1000) {
+          log.notice("云构建任务主动断开");
+          resolve(true);
+        } else {
+          log.error("云构建任务异常断开:", code, reason.toString());
+          reject(new Error(`云构建任务异常断开: ${code} - ${reason}`));
+        }
+      });
     });
   };
   // 检查当前版本是否已经发布过了

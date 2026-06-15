@@ -7,7 +7,7 @@ const { Git, log, CloudBuild, inquirer } = require('@ttn-cli/utils');
 
 // 发布HTML模板代码
 async function uploadTemplate() {
-
+  console.log('还要去上传模版');
 }
 
 function checkProjectInfo() {
@@ -73,7 +73,7 @@ async function publish(options = {}) {
   const cloudBuild = new CloudBuild({
     name, version, dir, scripts, remoteUrl, branch, env, domain, previewDomain,
   });
-  // 判断当前版本是否已经发布过了
+  // 判断当前版本是否已经发布过了 TODO
   const isPublished = await cloudBuild.checkPublished();
   if (isPublished) {
     log.info('当前版本已发布，无需重复发布');
@@ -85,7 +85,7 @@ async function publish(options = {}) {
   // 客户端发送 build 消息
   buildRet = await cloudBuild.build();
   if (buildRet) {
-    await this.uploadTemplate();
+    await uploadTemplate();
   }
   const endTime = new Date().getTime();
   log.info('本次发布耗时：', Math.floor((endTime - startTime) / 1000) + '秒');
