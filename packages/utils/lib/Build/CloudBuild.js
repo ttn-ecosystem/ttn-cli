@@ -16,11 +16,11 @@ class CloudBuild {
     this.timer = setTimeout(fn, timeout);
   };
   prepare = async () => {
-    log.notice("开始云构建任务准备");
+    log.notice("云构建任务准备");
   };
   // 建立云构建连接
   init = () => {
-    log.notice("开始云构建任务初始化");
+    log.notice("云构建任务初始化开始");
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket(WS_SERVER);
       this.ws.on("open", () => {
@@ -39,7 +39,6 @@ class CloudBuild {
       });
     })
   };
-
   build = () => {
     return new Promise((resolve, reject) => {
       // 发送 build 消息
@@ -48,12 +47,17 @@ class CloudBuild {
           type: "build",
           payload: this.options,
         }));
+        resolve();
       } else {
         log.error("WebSocket 未连接，无法发送 build 消息");
+        reject(new Error("WebSocket 未连接，无法发送 build 消息"));
       }
-
     });
-  }
+  };
+  // 检查当前版本是否已经发布过了
+  checkPublished = async () => {
+    return false;
+  };
 }
 
 module.exports = CloudBuild;

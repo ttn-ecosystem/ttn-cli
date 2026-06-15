@@ -73,8 +73,16 @@ async function publish(options = {}) {
   const cloudBuild = new CloudBuild({
     name, version, dir, scripts, remoteUrl, branch, env, domain, previewDomain,
   });
+  // 判断当前版本是否已经发布过了
+  const isPublished = await cloudBuild.checkPublished();
+  if (isPublished) {
+    log.info('当前版本已发布，无需重复发布');
+    process.exit(0);
+  }
   await cloudBuild.prepare();
+  // 客户端 SDK 建立成功
   await cloudBuild.init();
+  // 客户端发送 build 消息
   buildRet = await cloudBuild.build();
   if (buildRet) {
     await this.uploadTemplate();
