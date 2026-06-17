@@ -7,16 +7,20 @@ ttn-cli 是一个前端脚手架工程，用于快速搭建前端项目。
 cd /Users/qiangyujun/Desktop/study/ttn-cli
 pnpm install
 ```
+删除这个符号链接：
+```Bash
+rm /Users/qiangyujun/.nvm/versions/node/v22.19.0/bin/ttn-cli
+```
 2. 本地链接 CLI
 npm link 会在 /usr/local/bin/ttn-cli 创建符号链接，指向 packages/core/bin/ttn-cli.js
 ```Bash
 cd packages/core
-pnpm link # 将 ttn-cli 链接为全局命令
+npm link # 将 ttn 链接为全局命令
 ```
 3. 验证安装
 ```Bash
-ttn-cli -V    # 查看版本
-ttn-cli desc  # 查看描述信息
+ttn -V    # 查看版本
+ttn desc  # 查看描述信息
 ```
 
 ### 使用方式
@@ -27,7 +31,7 @@ cd my-project
 ```
 2. 初始化项目
 ```Bash
-ttn-cli init
+ttn init
 ```
 
 ### 创建一个新lerna包
@@ -50,9 +54,9 @@ https://chatgpt.com/c/6a2942b0-e970-83e8-b2e5-364954d86857
 ### publish
 - 线上环境部署项目
 ```Bash
-ttn-cli publish
+ttn publish
 ```
 - 语法环境部署项目
 ```Bash
-ttn-cli publish --pre
+ttn publish --pre
 ```

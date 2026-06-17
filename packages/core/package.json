@@ -7,7 +7,7 @@
   "license": "ISC",
   "main": "bin/ttn-cli.js",
   "bin": {
-    "ttn-cli": "bin/ttn-cli.js"
+    "ttn": "bin/ttn-cli.js"
   },
   "directories": {
     "lib": "lib",

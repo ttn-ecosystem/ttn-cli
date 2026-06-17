@@ -10,11 +10,8 @@ const { log, locale, npm, Package, exec } = require("@ttn-cli/utils");
 const packageConfig = require("../package.json");
 
 // 常量定义
-const LOWEST_NODE_VERSION = "20.0.0";
 const NPM_NAME = "@ttn-cli/core";
 const DEFAULT_CLI_HOME = '.ttn-cli';
-// 脚手架内部依赖包存在的目录
-const DEPENDENCIES_PATH = "dependencies";
 
 module.exports = cli;
 
@@ -25,17 +22,40 @@ let config = {
   cliHome: path.join(userHome, DEFAULT_CLI_HOME),
 };
 
+// 命令配置
+const commands = [
+  {
+    name: "init",
+    description: "项目初始化",
+    options: ["--force", "是否强制初始化项目"],
+    packageName: "@ttn-cli/init",
+    packageVersion: "1.0.0",
+  },
+  {
+    name: "publish",
+    description: "发布项目",
+    options: ["--pre", "是否发布到预发环境"],
+    packageName: "@ttn-cli/publish",
+    packageVersion: "1.0.0",
+  },
+];
+
 async function cli() {
   try {
+    // 如果输入的指令是看 版本号 / 帮助信息 / 无参数，只注册指令，不执行 prepare 了
     const isVersionOrHelp = ["-V", "--version", "-h", "--help"].some((arg) =>
       process.argv.includes(arg),
     );
     const hasNoArgs = process.argv.slice(2).length === 0;
-    // 原指令 / ttn-cli 无参数，输出 help 帮助信息
     if (isVersionOrHelp || hasNoArgs) {
       registerCommand();
       return;
     }
+    // 先预校验命令是否合法，避免无效的 prepare 开销
+    if (!isValidCommand()) {
+      process.exit(1);
+    }
+    // 执行脚手架使用前准备
     await prepare();
     // 注册命令
     registerCommand();
@@ -45,32 +65,37 @@ async function cli() {
   }
 }
 
+function isValidCommand() {
+  const availableCommands = commands.map((cmd) => cmd.name);
+  const userCommand = process.argv[2];
+  if (!availableCommands.includes(userCommand)) {
+    log.error("未知的命令: " + userCommand);
+    log.info("可用命令: " + availableCommands.join("、"));
+    return false;
+  }
+  return true;
+}
+
 // 注册指令
 function registerCommand() {
   // 支持 ttn-cli -V / --version
   program.version(packageConfig.version).usage("<command> [options]");
-  program
-    .command("init")
-    .description("项目初始化")
-    .option("--force", "是否强制初始化项目")
-    .action(async ({ force }) => {
-      const packageName = "@ttn-cli/init";
-      const packageVersion = "1.0.0";
-      await execCommand({ packageName, packageVersion }, { force });
-    });
-  // 发布命令
-  program
-    .command("publish")
-    .description("发布项目")
-    .option("--pre", "是否发布到预发环境")
-    .action(async ({ pre }) => {
-      const packageName = "@ttn-cli/publish";
-      const packageVersion = "1.0.0";
-      await execCommand({ packageName, packageVersion }, { pre });
-    });
+  // 从配置动态注册命令
+  commands.forEach((cmd) => {
+    program
+      .command(cmd.name)
+      .description(cmd.description)
+      .option(cmd.options[0], cmd.options[1])
+      .action(async (options) => {
+        await execCommand(
+          { packageName: cmd.packageName, packageVersion: cmd.packageVersion },
+          options,
+        );
+      });
+  });
   // 处理未知命令
   program.on("command:*", function (args) {
-    const availableCommands = program.commands.map((cmd) => cmd.name());
+    const availableCommands = commands.map((cmd) => cmd.name);
     log.error("未知的命令: " + args[0]);
     log.info("可用命令: " + availableCommands.join(" "));
     process.exit(1);
@@ -151,7 +176,7 @@ async function execCommand({ packageName, packageVersion }, extraOptions) {
 
 async function prepare() {
   checkPkgVersion(); // 检查当前运行版本
-  checkNodeVersion(); // 检查 node 版本
+  // checkNodeVersion(); // 检查 node 版本 TODO 感觉没必要校验 node 版本
   checkRoot(); // 检查是否为 root 启动
   checkUserHome(); // 检查用户主目录
   checkInputArgs(); // 检查用户输入参数
@@ -164,18 +189,9 @@ function checkPkgVersion() {
   log.success(locale.welcome);
 }
 
-function checkNodeVersion() {
-  log.notice("当前 Node.js 版本:", process.version);
-  if (!semver.gte(process.version, LOWEST_NODE_VERSION)) {
-    log.error(`ttn-cli 需要安装 v${LOWEST_NODE_VERSION} 以上版本的 Node.js`);
-    process.exit(1);
-  }
-}
-
 function checkRoot() {
   const rootCheck = require("root-check");
-  // rootCheck() 执行后会自动将进程从 root 用户切换回执行 sudo 命令的普通用户
-  rootCheck();
+  rootCheck();  // rootCheck() 执行后会自动将进程从 root 用户切换回普通用户
 }
 
 function checkUserHome() {
