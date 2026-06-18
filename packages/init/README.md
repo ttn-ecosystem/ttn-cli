@@ -3,9 +3,4 @@
 > TODO: description
 
 ## Usage
-
-```
-const init = require('@ttn-cli/init');
-
-// TODO: DEMONSTRATE API
-```
+    ttn-cli 项目初始化

@@ -3,9 +3,4 @@
 > TODO: description
 
 ## Usage
-
-```
-const publish = require('publish');
-
-// TODO: DEMONSTRATE API
-```
+    ttn-cli 项目发布

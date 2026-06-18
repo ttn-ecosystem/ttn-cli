@@ -27,14 +27,18 @@ const commands = [
   {
     name: "init",
     description: "项目初始化",
-    options: ["--force", "是否强制初始化项目"],
+    options: [
+      { name: "--force", description: "是否强制初始化项目" },
+    ],
     packageName: "@ttn-cli/init",
     packageVersion: "1.0.0",
   },
   {
     name: "publish",
     description: "发布项目",
-    options: ["--pre", "是否发布到预发环境"],
+    options: [
+      { name: "--pre", description: "是否发布到预发环境" },
+    ],
     packageName: "@ttn-cli/publish",
     packageVersion: "1.0.0",
   },
@@ -51,10 +55,7 @@ async function cli() {
       registerCommand();
       return;
     }
-    // 先预校验命令是否合法，避免无效的 prepare 开销
-    if (!isValidCommand()) {
-      process.exit(1);
-    }
+    if (!isValidCommand()) process.exit(1);
     // 执行脚手架使用前准备
     await prepare();
     // 注册命令
@@ -82,16 +83,17 @@ function registerCommand() {
   program.version(packageConfig.version).usage("<command> [options]");
   // 从配置动态注册命令
   commands.forEach((cmd) => {
-    program
-      .command(cmd.name)
-      .description(cmd.description)
-      .option(cmd.options[0], cmd.options[1])
-      .action(async (options) => {
-        await execCommand(
-          { packageName: cmd.packageName, packageVersion: cmd.packageVersion },
-          options,
-        );
-      });
+    let cmdInstance = program.command(cmd.name).description(cmd.description);
+    // 支持多个 options
+    cmd.options.forEach((opt) => {
+      cmdInstance = cmdInstance.option(opt.name, opt.description);
+    });
+    cmdInstance.passCommandToAction(false).action(async (options) => {
+      await execCommand(
+        { packageName: cmd.packageName, packageVersion: cmd.packageVersion },
+        options,
+      );
+    });
   });
   // 处理未知命令
   program.on("command:*", function (args) {

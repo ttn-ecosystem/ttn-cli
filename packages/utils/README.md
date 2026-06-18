@@ -3,9 +3,4 @@
 > TODO: description
 
 ## Usage
-
-```
-const utils = require('utils');
-
-// TODO: DEMONSTRATE API
-```
+    ttn-cli 工具函数
