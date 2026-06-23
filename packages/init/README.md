@@ -3,4 +3,4 @@
 > TODO: description
 
 ## Usage
-    ttn-cli 项目初始化
+    ttn-cli 项目初始化创建

@@ -10,7 +10,6 @@ const request = require("./request");
 const spinner = require("./spinner");
 const formatPath = require("./formatPath");
 const terminalLink = require("./terminalLink");
-const formatName = require("./formatName");
 const inquirer = require('./inquirer');
 const locale = require("./Locale/loadLocale");
 const CloudBuild = require("./Build/CloudBuild.js");
@@ -27,7 +26,6 @@ module.exports = {
   request,
   spinner,
   terminalLink,
-  formatName,
   Git,
   inquirer,
   Package,

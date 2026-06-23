@@ -2,16 +2,13 @@
 
 const fs = require('fs');
 const fse = require('fs-extra');
-const { log, inquirer, spinner, Package, sleep, exec, formatName, ejs } = require('@ttn-cli/utils');
+const { log, inquirer, spinner, Package, sleep, exec, ejs } = require('@ttn-cli/utils');
 const getProjectTemplate = require('./getProjectTemplate');
 
 async function init(options) {
   try {
     // 设置要创建的项目安装的路径，相当于执行 pwd
-    let targetPath = process.cwd();
-    if (!options.targetPath) {
-      options.targetPath = targetPath;
-    }
+    options.targetPath = process.cwd();
     const result = await prepare(options);
     if (!result) {
       log.info('创建项目终止');
@@ -172,15 +169,11 @@ async function prepare(options) {
   // 获取项目名称
   while (!projectName) {
     projectName = await getProjectName();
-    if (projectName) {
-      projectName = formatName(projectName); // 格式化为 kebab-case
-    }
-    log.verbose('name', projectName);
   }
   return {
     templateList,
     project: {
-      projectName:projectName
+      projectName
     },
   };
 }
