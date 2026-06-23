@@ -12,6 +12,7 @@ const { log, locale, npm, Package, exec } = require("@ttn-cli/utils");
 // 常量定义
 const NPM_NAME = "@ttn-cli/core";
 const DEFAULT_CLI_HOME = '.ttn-cli';
+const DEPENDENCIES_PATH = 'dependencies';
 
 module.exports = cli;
 
@@ -115,18 +116,16 @@ function registerCommand() {
 async function execCommand({ packageName, packageVersion }, extraOptions) {
   let rootFile;
   try {
-    // 检查本地包是否存在（开发模式）
+    // 检查执行包是否存在（判断是否是开发模式）
     const localPackagePath = path.resolve(__dirname, `../../${packageName.split("/")[1]}`);
     let devPackagePath = null;
-    if (fs.existsSync(localPackagePath)) {
-      devPackagePath = localPackagePath;
-    }
-
+    // 本地包路径
+    if (fs.existsSync(localPackagePath)) devPackagePath = localPackagePath;
     if (devPackagePath) {
       const execPackage = new Package({
-        // 包安装目标路径
+        // 当前包所在的项目根目录
         targetPath: devPackagePath,
-        // 全局包缓存路径
+        // 包的真实存储目录（物理存放位置）
         storePath: devPackagePath,
         name: packageName,
         version: packageVersion,
@@ -134,27 +133,34 @@ async function execCommand({ packageName, packageVersion }, extraOptions) {
       rootFile = execPackage.getRootFilePath(true);
     } else {
       // 生产模式：从缓存目录加载
-      // const { cliHome } = config; // '/Users/qiangyujun/.ttn-cli'
-      // const packageDir = `${DEPENDENCIES_PATH}`; // dependencies
-      // const targetPath = path.resolve(cliHome, packageDir); // '/Users/qiangyujun/.ttn-cli/dependencies'
-      // // 全局包缓存路径
-      // const storePath = path.resolve(targetPath, "node_modules"); // '/Users/qiangyujun/.ttn-cli/dependencies/node_modules'
-      // const execPackage = new Package({
-      //   targetPath,
-      //   storePath,
-      //   name: packageName,
-      //   version: packageVersion,
-      // });
-      // // 检查本地缓存，不存在则从 npm 安装
-      // if (await execPackage.exists()) {
-      //   await execPackage.update();
-      // } else {
-      //   await execPackage.install();
-      // }
-      // rootFile = execPackage.getRootFilePath();
+      const { cliHome } = config; // '/Users/xxx/.ttn-cli'
+      const packageDir = `${DEPENDENCIES_PATH}`; // dependencies
+      const targetPath = path.resolve(cliHome, packageDir); // '/Users/xxx/.ttn-cli/dependencies'
+      const storePath = path.resolve(targetPath, "node_modules"); // '/Users/xxx/.ttn-cli/dependencies/node_modules'
+      const execPackage = new Package({
+        targetPath,
+        storePath,
+        name: packageName,
+        version: packageVersion,
+      });
+      // 检查本地缓存，不存在则从 npm 安装
+      if (await execPackage.exists()) {
+        await execPackage.update();
+      } else {
+        await execPackage.install();
+      }
+      rootFile = execPackage.getRootFilePath();
     }
-    // 组合成一个完整的对象 {...}
-    const _config = Object.assign({}, config, extraOptions);
+    /**
+     * _config
+     * {
+     *    cliHome: '~/.ttn-cli/',
+     *    force: true,
+     *    pre: true
+     * }
+     */
+    const _config = Object.assign({}, config, extraOptions); // 参数组合成一个对象
+    // 判断主入口文件是否存在
     if (fs.existsSync(rootFile)) {
       const code = `require('${rootFile}')(${JSON.stringify(_config)})`;
       const p = exec("node", ["-e", code], { stdio: "inherit" }); // node -e "require('xxx')(config)"
