@@ -6,8 +6,8 @@ const userHome = require("user-home");
 const colors = require("colors/safe");
 const program = require("commander");
 const semver = require("semver");
-const { log, locale, npm, Package, exec } = require("@ttn-cli/utils");
 const packageConfig = require("../package.json");
+const { log, locale, npm, Package, exec } = require("@ttn-cli/utils");
 
 // 常量定义
 const NPM_NAME = "@ttn-cli/core";
@@ -17,8 +17,7 @@ module.exports = cli;
 
 let args; // 命令行参数
 let config = {
-  // ~/.ttn-cli/
-  // 脚手架自身的一些依赖，都在 用户根目录下
+  // ~/.ttn-cli/ 脚手架自身的一些依赖，都在 用户根目录下
   cliHome: path.join(userHome, DEFAULT_CLI_HOME),
 };
 
@@ -55,6 +54,7 @@ async function cli() {
       registerCommand();
       return;
     }
+    // 判断如果是未知指令，则直接终止
     if (!isValidCommand()) process.exit(1);
     // 执行脚手架使用前准备
     await prepare();
@@ -102,11 +102,12 @@ function registerCommand() {
     log.info("可用命令: " + availableCommands.join(" "));
     process.exit(1);
   });
-  program.option("--debug", "打开调试模式").parse(process.argv);
+  // 解析参数
+  program.parse(process.argv);
   // 直接输入 ttn-cli 没有子命令时，输出 help 帮助信息
   if (program.args && program.args.length < 1) {
     program.outputHelp();
-    console.log();
+    console.log(); // 打印空行
   }
 }
 
@@ -153,9 +154,7 @@ async function execCommand({ packageName, packageVersion }, extraOptions) {
       // rootFile = execPackage.getRootFilePath();
     }
     // 组合成一个完整的对象 {...}
-    const _config = Object.assign({}, config, extraOptions, {
-      debug: args.debug,
-    });
+    const _config = Object.assign({}, config, extraOptions);
     if (fs.existsSync(rootFile)) {
       const code = `require('${rootFile}')(${JSON.stringify(_config)})`;
       const p = exec("node", ["-e", code], { stdio: "inherit" }); // node -e "require('xxx')(config)"
@@ -177,11 +176,9 @@ async function execCommand({ packageName, packageVersion }, extraOptions) {
 }
 
 async function prepare() {
-  checkPkgVersion(); // 检查当前运行版本
-  // checkNodeVersion(); // 检查 node 版本 TODO 感觉没必要校验 node 版本
-  checkRoot(); // 检查是否为 root 启动
+  checkPkgVersion(); // 检查当前脚手架版本
+  checkRoot(); // 检查是否为 root 用户
   checkUserHome(); // 检查用户主目录
-  checkInputArgs(); // 检查用户输入参数
   checkEnv(); // 检查/加载 环境变量
   await checkGlobalUpdate(); // 检查当前脚手架是否需要更新
 }
@@ -204,13 +201,6 @@ function checkUserHome() {
   }
 }
 
-function checkInputArgs() {
-  log.verbose("开始校验输入参数");
-  const minimist = require("minimist"); // 将命令行参数转换为结构化的 JavaScript 对象
-  args = minimist(process.argv.slice(2)); // 解析查询参数
-  log.verbose("输入参数", args);
-}
-
 // 加载环境变量
 function checkEnv() {
   log.verbose("开始检查环境变量");
@@ -221,7 +211,7 @@ function checkEnv() {
     path: path.resolve(userHome, ".env"),
   });
   if (result.error) {
-    log.verbose(`环境变量加载失败: ${result.error.message}`);
+    log.verbose(`环境变量加载失败`);
   }
 }
 

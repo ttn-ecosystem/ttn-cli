@@ -1,7 +1,7 @@
 ## 前端脚手架工程
-ttn-cli 是一个前端脚手架工程，用于快速搭建前端项目。
+ttn-cli 是一个前端脚手架工程，用于快速 搭建前端项目/部署前端项目。
 
-### 开发调试
+### 本地开发调试
 1. 安装依赖
 ```Bash
 cd /Users/qiangyujun/Desktop/study/ttn-cli
